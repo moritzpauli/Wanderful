@@ -2,12 +2,18 @@
 
 #include "FPSwanderfulCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Engine.h"
+#include "Pickup.h"
+
+
+
+
 
 
 // Sets default values
 AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 }
@@ -22,10 +28,54 @@ void AFPSwanderfulCharacter::BeginPlay()
 	}
 }
 
+
+//raycast
+bool AFPSwanderfulCharacter::CastRay(FHitResult  &HitResult)
+{
+	
+	//sartpoint
+	FVector StartTrace = Camera->GetComponentLocation();
+	//Direction
+	FVector ForwardVector = Camera->GetForwardVector();
+	//length
+	FVector EndTrace = ((ForwardVector*1000.f) + StartTrace);
+	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
+	DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Magenta, true);
+	return GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams);
+		
+		
+	
+}
+
+void AFPSwanderfulCharacter::Interact()
+{
+	FHitResult hit;
+
+	if (CastRay(hit)) {
+		GEngine->AddOnScreenDebugMessage(0, 1, FColor::Red, hit.GetActor()->GetName());
+		if (hit.GetActor()->GetClass()->GetName()==("BP_Pickup_C")) {
+			//hit.GetActor()->Destroy();
+			//TODO Pickup Actor
+			hit.GetActor()->GetClass()->GetDefaultObject<APickUp>()->pickedUP = true;
+			Inventory = hit.GetActor();
+			UE_LOG(LogTemp, Warning, TEXT("hitit"));
+		}
+	}
+	
+
+	/*if (CastRay() != nullptr) {
+		if (CastRay()->GetActor()->GetName() == "PickUp1") {
+			CastRay()->GetActor()->Destroy();
+		}
+	}*/
+	//UE_LOG(LogTemp, Warning, TEXT("Interacted"));
+}
+
 // Called every frame
 void AFPSwanderfulCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 
 }
 
@@ -33,6 +83,7 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 void AFPSwanderfulCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AFPSwanderfulCharacter::Interact);
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFPSwanderfulCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPSwanderfulCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &AFPSwanderfulCharacter::AddControllerYawInput);
@@ -45,6 +96,10 @@ void AFPSwanderfulCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AFPSwanderfulCharacter::StopJump);
 
 }
+
+
+
+
 
 void AFPSwanderfulCharacter::MoveForward(float value)
 {
@@ -69,5 +124,7 @@ void AFPSwanderfulCharacter::StopJump()
 {
 	bPressedJump = false;
 }
+
+
 
 
