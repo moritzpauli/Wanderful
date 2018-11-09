@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameplayTagAssetInterface.h"
 #include "FPSwanderfulCharacter.generated.h"
 
 UCLASS()
-class WANDERFUL_API AFPSwanderfulCharacter : public ACharacter
+class WANDERFUL_API AFPSwanderfulCharacter : public ACharacter, public IGameplayTagAssetInterface
 {
 	GENERATED_BODY()
 
@@ -16,11 +17,17 @@ public:
 	AFPSwanderfulCharacter();
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* Camera;
-
+	UPROPERTY(EditAnywhere)
+	FGameplayTagContainer GameplayTags;
+	UPROPERTY(EditAnywhere)
+	AActor* Inventory;
+	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	bool CastRay(FHitResult &HitResult);
+	void Interact();
 
 public:	
 	// Called every frame
@@ -28,6 +35,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override { TagContainer = GameplayTags; return; }
+
+	
 
 	UFUNCTION()
 		void MoveForward(float value);
@@ -40,6 +50,8 @@ public:
 
 	UFUNCTION()
 		void StopJump();
+
+
 
 	
 };
