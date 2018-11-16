@@ -28,6 +28,10 @@ protected:
 	virtual void BeginPlay() override;
 	bool CastRay(FHitResult &HitResult);
 	void Interact();
+	void Drop();
+	void OnInspect();
+	void OnInspectReleased();
+
 
 public:	
 	// Called every frame
@@ -37,7 +41,25 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override { TagContainer = GameplayTags; return; }
 
-	
+	UPROPERTY(EditAnywhere)
+	class USceneComponent* HoldingComponent;
+
+	UPROPERTY(EditAnywhere)
+	class APickUp* CurrentItem;
+
+	UPROPERTY(EditAnywhere)
+	FVector HoldingPosition;
+
+	bool bCanMove;
+	bool bHoldingPickUp;
+	bool bInspecting;
+
+	float rotationMax;
+	float rotationMin;
+
+	FVector HoldingComp;
+	FRotator LastRotation;
+
 
 	UFUNCTION()
 		void MoveForward(float value);
@@ -51,7 +73,8 @@ public:
 	UFUNCTION()
 		void StopJump();
 
-
+	void ToggleMovement();
+	void ToggleItemPU();
 
 	
 };

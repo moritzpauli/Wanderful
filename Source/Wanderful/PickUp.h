@@ -2,8 +2,13 @@
 
 #pragma once
 
+
 #include "Components/StaticMeshComponent.h"
 #include "CoreMinimal.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
+#include "Camera/CameraComponent.h"
+#include "FPSwanderfulCharacter.h"
 #include "GameFramework/Actor.h"
 #include "GameplayTagAssetInterface.h"
 
@@ -19,14 +24,44 @@ public:
 	// Sets default values for this actor's properties
 	APickUp();
 	UPROPERTY(EditAnywhere)
-		UStaticMeshComponent* mesh;
+	UStaticMeshComponent* mesh;
+	UPROPERTY(EditAnywhere)
+	USceneComponent* HoldingComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameplayTags")
 	FGameplayTagContainer GameplayTags;
-	UPROPERTY(EditAnywhere)
 	bool pickedUP;
+	UPROPERTY(EditAnywhere)
+	FString msg;
+	UPROPERTY(EditAnywhere)
+	AActor* PlayerActor;
+	bool setTimer;
+	bool gravity;
+
+
+	UPROPERTY(EditAnywhere)
+	bool throwable;
+	UPROPERTY(EditAnywhere)
+	bool wieldable;
+	UPROPERTY(EditAnywhere)
+	bool inspectable;
 	
 
+	UFUNCTION()
+	void InspectActor();
 
+	UFUNCTION()
+	void PickUpObject();
+
+	FRotator ControlRotation;
+	AFPSwanderfulCharacter* MyPlayer;
+	UCameraComponent* PlayerCamera;
+	FVector ForwardVector;
+	
+protected:
+	FTimerHandle physicsReset;
+	
+	TArray<AActor*> MyPlayers;
+	void EnablePhysics();
 
 protected:
 	// Called when the game starts or when spawned
@@ -36,7 +71,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override { TagContainer = GameplayTags; return; }
-
+	void SetPu(bool pickupNew) { pickedUP = pickupNew; UE_LOG(LogTemp,Warning,TEXT("setPU"))};
+	bool GetPu() { return pickedUP; };
 	
 	
 };
