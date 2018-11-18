@@ -98,11 +98,11 @@ void APickUp::PickUpObject()
 	mesh->SetSimulatePhysics(pickedUP ? false : true);
 	mesh->SetCollisionEnabled(pickedUP ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryAndPhysics);
 
-	if (!pickedUP && !inspectable) {
+	if (!pickedUP && throwable) {
 		ForwardVector = PlayerCamera->GetForwardVector();
-		mesh->AddForce(ForwardVector * 100000 * mesh->GetMass());
+		mesh->AddForce(ForwardVector * 20000 * mesh->GetMass());
 	}
-	if (!pickedUP && inspectable) {
+	if (!pickedUP && !throwable) {
 		ForwardVector = PlayerCamera->GetForwardVector();
 		mesh->AddForce(ForwardVector * 100 * mesh->GetMass());
 	}
