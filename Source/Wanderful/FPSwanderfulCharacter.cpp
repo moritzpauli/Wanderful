@@ -153,7 +153,7 @@ bool AFPSwanderfulCharacter::CastRay(FHitResult  &HitResult)
 	//length
 	FVector EndTrace = ((ForwardVector*200.f) + StartTrace);
 	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
-	DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Magenta, true);
+	//DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Magenta, true);
 	return GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams);
 
 
