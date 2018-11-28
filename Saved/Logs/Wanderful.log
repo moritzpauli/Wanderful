@@ -329,3 +329,5 @@ LogInit: Object subsystem initialized
 [2018.11.28-17.06.48:958][431]LogSlate: Took 0.001444 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/Roboto-Light.ttf' (167K)
 [2018.11.28-17.06.52:841][894]LogSlate: FSceneViewport::OnFocusLost() reason 0
 [2018.11.28-17.07.05:446][384]LogSlate: FSceneViewport::OnFocusLost() reason 2
+[2018.11.28-17.44.00:912][601]LogSlate: FSceneViewport::OnFocusLost() reason 0
+[2018.11.28-18.16.44:161][447]LogSlate: FSceneViewport::OnFocusLost() reason 0
