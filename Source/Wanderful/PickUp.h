@@ -36,7 +36,7 @@ public:
 	AActor* PlayerActor;
 	bool setTimer;
 	bool gravity;
-
+	bool bInspecting;
 
 	UPROPERTY(EditAnywhere)
 	bool throwable;

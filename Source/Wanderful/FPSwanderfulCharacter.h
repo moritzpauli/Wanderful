@@ -5,12 +5,19 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GameplayTagAssetInterface.h"
+#include "StaticInteractable.h"
 #include "FPSwanderfulCharacter.generated.h"
+
 
 UCLASS()
 class WANDERFUL_API AFPSwanderfulCharacter : public ACharacter, public IGameplayTagAssetInterface
 {
 	GENERATED_BODY()
+
+
+
+
+
 
 public:
 	// Sets default values for this character's properties
@@ -20,8 +27,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	FGameplayTagContainer GameplayTags;
 	UPROPERTY(EditAnywhere)
-	AActor* Inventory;
-	
+	AActor* Inventory;	
+	UPROPERTY(EditAnywhere)
+	class UPostProcessComponent* InspectBlur;
+	//UPROPERTY(EditAnywhere)
+	//FPostProcessSettings InspectBlurSettings;
+	UPROPERTY(EditAnywhere)
+	bool bFire;
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,6 +43,15 @@ protected:
 	void Drop();
 	void OnInspect();
 	void OnInspectReleased();
+	void OnFiring();
+	AStaticInteractable* CurrentInView;
+	
+
+
+protected:
+	bool bBacklash;
+	float StartWhackRotation;
+	
 
 
 public:	
@@ -43,12 +64,20 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* HoldingComponent;
+	UPROPERTY(EditAnywhere)
+	class USceneComponent* StickHoldingComponent;
 
 	UPROPERTY(EditAnywhere)
 	class APickUp* CurrentItem;
 
 	UPROPERTY(EditAnywhere)
 	FVector HoldingPosition;
+	UPROPERTY(EditAnywhere)
+	FTransform StickHoldingTransform;
+	UPROPERTY(EditAnywhere)
+	float whackspeed;
+	UPROPERTY(EditAnywhere)
+	float whacklimit;
 
 	bool bCanMove;
 	bool bHoldingPickUp;
@@ -72,6 +101,7 @@ public:
 
 	UFUNCTION()
 		void StopJump();
+
 
 	void ToggleMovement();
 	void ToggleItemPU();

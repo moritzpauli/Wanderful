@@ -20,6 +20,7 @@ APickUp::APickUp()
 
 void APickUp::EnablePhysics()
 {
+	
 	mesh->SetSimulatePhysics(true);
 	UE_LOG(LogTemp, Warning, TEXT("Physics Reactivated"));
 }
@@ -29,6 +30,7 @@ void APickUp::BeginPlay()
 {
 	Super::BeginPlay();
 	pickedUP = false;
+	mesh->SetRenderCustomDepth(false);
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(),AFPSwanderfulCharacter::StaticClass() ,MyPlayers);
 	MyPlayer = Cast<AFPSwanderfulCharacter>(MyPlayers[0]);
 	PlayerCamera = MyPlayer->FindComponentByClass<UCameraComponent>();
@@ -39,8 +41,15 @@ void APickUp::BeginPlay()
 
 	if (Components.Num() > 0) {
 		for (auto& Comp : Components) {
-			if (Comp->GetName() == "HoldingComponent") {
-				HoldingComp = Cast<USceneComponent>(Comp);
+			if (!wieldable) {
+				if (Comp->GetName() == "HoldingComponent") {
+					HoldingComp = Cast<USceneComponent>(Comp);
+				}
+			}
+			if (wieldable) {
+				if (Comp->GetName() == "StickHoldingComponent") {
+					HoldingComp = Cast<USceneComponent>(Comp);
+				}
 			}
 		}
 	}
@@ -51,6 +60,13 @@ void APickUp::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//picking up the stick
+	if (bInspecting) {
+		mesh->SetRenderCustomDepth(true);
+	}
+	else {
+		mesh->SetRenderCustomDepth(false);
+	}
+
 	if (pickedUP) {
 
 		if (HoldingComp) {
@@ -88,6 +104,7 @@ void APickUp::InspectActor()
 
 	ControlRotation = GetWorld()->GetFirstPlayerController()->GetControlRotation();
 	SetActorRotation(FQuat(ControlRotation));
+	mesh->SetRenderCustomDepth(true);
 }
 
 void APickUp::PickUpObject() 

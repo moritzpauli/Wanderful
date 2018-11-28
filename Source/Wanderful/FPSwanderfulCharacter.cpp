@@ -19,11 +19,17 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	HoldingComponent = CreateDefaultSubobject<USceneComponent>("HoldingComponent");
+	StickHoldingComponent = CreateDefaultSubobject<USceneComponent>("StickHoldingComponent");
 	HoldingComponent->SetRelativeLocation(HoldingPosition);
 	HoldingComponent->SetupAttachment(Camera);
+	StickHoldingComponent->SetRelativeTransform(StickHoldingTransform);
+	StickHoldingComponent->SetupAttachment(Camera);
 	CurrentItem = NULL;
 	bCanMove = true;
 	bInspecting = false;
+	InspectBlur = CreateDefaultSubobject<UPostProcessComponent>("InspectBlur");
+	StartWhackRotation = 69.0f;
+	bFire = false;
 }
 
 // Called when the game starts or when spawned
@@ -37,6 +43,7 @@ void AFPSwanderfulCharacter::BeginPlay()
 
 	rotationMax = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax;
 	rotationMin = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMin;
+	InspectBlur->bEnabled = false;
 }
 
 
@@ -49,6 +56,17 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 
 	if (!bHoldingPickUp) {
 		if (CastRay(hit)) {
+
+			if (hit.GetActor()->GetClass()->IsChildOf(AStaticInteractable::StaticClass())) {
+				CurrentInView = Cast<AStaticInteractable>(hit.GetActor());
+				CurrentInView->bInView = true;
+			}
+			else {
+				if (CurrentInView) {
+					CurrentInView->bInView = false;
+				}
+			}
+
 			GEngine->AddOnScreenDebugMessage(0, 1, FColor::Red, hit.GetActor()->GetName());
 			if (hit.GetActor()->GetClass()->IsChildOf(APickUp::StaticClass())) {
 				//hit.GetActor()->Destroy(); 
@@ -69,17 +87,26 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 		else
 		{
 			CurrentItem = NULL;
+			if (CurrentInView) {
+				CurrentInView->bInView = false;
+			}
 		}
 
 	}
-	
+
 	if (bInspecting) {
 		if (bHoldingPickUp) {
 			Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 90.0f, 0.1f));
+
 			HoldingComponent->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
+			StickHoldingComponent->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
+			StickHoldingComponent->SetRelativeRotation(FQuat(0,0,0,0));
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = 179.9000000000002f;
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = -179.9000000000002f;
 			CurrentItem->InspectActor();
+			if (CurrentItem) {
+				CurrentItem->bInspecting = true;
+			}
 		}
 		else {
 			Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 45.0f, 0.1f));
@@ -88,12 +115,30 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 
 	}
 	else {
+		if (CurrentItem) {
+			CurrentItem->bInspecting = false;
+		}
 		Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 90.0f, 0.1f));
 		if (bHoldingPickUp) {
 			HoldingComponent->SetRelativeLocation(HoldingPosition);
+			StickHoldingComponent->SetRelativeTransform(StickHoldingTransform);
 		}
 	}
 
+
+	if (CurrentItem && CurrentItem->wieldable && bFire) {
+		StickHoldingComponent->RelativeRotation.Pitch += whackspeed;
+		if (StickHoldingComponent->RelativeRotation.Pitch >= whacklimit) {
+			bBacklash = true;
+		}
+		if (bBacklash) {
+			StickHoldingComponent->RelativeRotation.Pitch -= whackspeed;
+			if (StickHoldingComponent->RelativeRotation.Pitch <= StartWhackRotation) {
+				bBacklash = false;
+				bFire = false;
+			}
+		}
+	}
 }
 
 
@@ -155,11 +200,14 @@ void AFPSwanderfulCharacter::Interact()
 	//UE_LOG(LogTemp, Warning, TEXT("Interacted"));
 }
 
+
+
 void AFPSwanderfulCharacter::OnInspect()
 {
 	if (bHoldingPickUp) {
 		LastRotation = GetControlRotation();
 		ToggleMovement();
+		InspectBlur->bEnabled = true;
 	}
 	else {
 		bInspecting = true;
@@ -173,6 +221,7 @@ void AFPSwanderfulCharacter::OnInspectReleased()
 		GetController()->SetControlRotation(LastRotation);
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = rotationMax;
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMin = rotationMin;
+		InspectBlur->bEnabled = false;
 		ToggleMovement();
 
 	}
@@ -180,6 +229,15 @@ void AFPSwanderfulCharacter::OnInspectReleased()
 		bInspecting = false;
 	}
 
+}
+
+void AFPSwanderfulCharacter::OnFiring()
+{
+	if (CurrentItem) {
+		if(CurrentItem->wieldable)
+			bFire = true;
+	}
+	
 }
 
 void AFPSwanderfulCharacter::ToggleMovement()
@@ -230,6 +288,7 @@ void AFPSwanderfulCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AFPSwanderfulCharacter::Interact);
 	PlayerInputComponent->BindAction("Inspect", IE_Pressed, this, &AFPSwanderfulCharacter::OnInspect);
 	PlayerInputComponent->BindAction("Inspect", IE_Released, this, &AFPSwanderfulCharacter::OnInspectReleased);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSwanderfulCharacter::OnFiring);
 
 }
 
