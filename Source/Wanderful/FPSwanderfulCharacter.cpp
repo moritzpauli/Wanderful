@@ -30,6 +30,9 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	InspectBlur = CreateDefaultSubobject<UPostProcessComponent>("InspectBlur");
 	StartWhackRotation = 69.0f;
 	bFire = false;
+	MyShakeUC = Cast<UCameraShake>(MyShake);
+	bBobStraight = false;
+	bBobStrafe = false;
 }
 
 // Called when the game starts or when spawned
@@ -204,6 +207,7 @@ void AFPSwanderfulCharacter::Interact()
 
 void AFPSwanderfulCharacter::OnInspect()
 {
+	
 	if (bHoldingPickUp) {
 		LastRotation = GetControlRotation();
 		ToggleMovement();
@@ -217,6 +221,8 @@ void AFPSwanderfulCharacter::OnInspect()
 
 void AFPSwanderfulCharacter::OnInspectReleased()
 {
+	
+	
 	if (bInspecting && bHoldingPickUp) {
 		GetController()->SetControlRotation(LastRotation);
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = rotationMax;
@@ -299,6 +305,14 @@ void AFPSwanderfulCharacter::MoveForward(float value)
 	if (bCanMove) {
 		FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
 		AddMovementInput(Direction, value);
+		if (abs(value) > 0 && !bBobStrafe) {
+			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 0.08f);
+			bBobStraight = true;
+		}
+		else {
+			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StopCameraShake(MyShakeUC, true);
+			bBobStraight = false;
+		}
 	}
 }
 
@@ -308,6 +322,14 @@ void AFPSwanderfulCharacter::MoveRight(float value)
 		//find out right direction
 		FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
 		AddMovementInput(Direction, value);
+		if ( abs(value) > 0 && !bBobStraight) {
+			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 0.08f);
+			bBobStrafe = true;
+		}
+		else {
+			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StopCameraShake(MyShakeUC, true);
+			bBobStrafe = false;
+		}
 	}
 }
 

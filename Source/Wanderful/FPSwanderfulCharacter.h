@@ -51,6 +51,8 @@ protected:
 protected:
 	bool bBacklash;
 	float StartWhackRotation;
+	bool bBobStrafe;
+	bool bBobStraight;
 	
 
 
@@ -66,7 +68,10 @@ public:
 	class USceneComponent* HoldingComponent;
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* StickHoldingComponent;
-
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShake> MyShake;
+	UPROPERTY(EditAnywhere)
+		UCameraShake* MyShakeUC;
 	UPROPERTY(EditAnywhere)
 	class APickUp* CurrentItem;
 
