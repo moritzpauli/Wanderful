@@ -3,6 +3,9 @@
 #include "StaticInteractable.h"
 #include "Components/BoxComponent.h"
 #include "FPSwanderfulCharacter.h"
+#include "Engine.h"
+#include "FPSwanderfulCharacter.h"
+
 
 
 // Sets default values
@@ -15,15 +18,23 @@ AStaticInteractable::AStaticInteractable()
 	CollisionBox->SetCollisionProfileName("Trigger");
 	CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AStaticInteractable::OnOverlapBegin);
 	CollisionBox->OnComponentEndOverlap.AddDynamic(this, &AStaticInteractable::OnOverlapEnd);
-	bInteractReady = false;
+	bInteracting = false;
 	bInView = false;
 	bInRange = false;
+	bInteractEndReady = false;
+	
 }
 
 // Called when the game starts or when spawned
 void AStaticInteractable::BeginPlay()
 {
 	Super::BeginPlay();
+	EnableInput(GetWorld()->GetFirstPlayerController());
+	UInputComponent* myInputComponent = this->InputComponent;
+	if (myInputComponent) {
+		SetupInteractableInputComponent(myInputComponent);
+
+	}
 	
 }
 
@@ -31,12 +42,54 @@ void AStaticInteractable::BeginPlay()
 void AStaticInteractable::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (bInRange && bInView) {
-		OnInteractReady();
-		bInteractReady = true;
+
+	if (bInRange && bInView && !bInteracting) {
+		if (bInteractPressed) {
+			OnInteract();
+		}
+	}
+	if (bInteracting && !bInteractPressed) {
+		bInteractEndReady = true;
+	}
+	if (bInteractEndReady && bInteractPressed) {
+		OnInteractEnd();
 	}
 
 }
+
+
+void AStaticInteractable::OnInteract()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Static Interact Time "));
+	bInteracting = true;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFPSwanderfulCharacter::StaticClass(), MyPlayers);
+	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bCanMove = false;
+}
+
+void AStaticInteractable::OnInteractEnd() {
+	bInteracting = false;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFPSwanderfulCharacter::StaticClass(), MyPlayers);
+	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bCanMove = true;
+	bInteractEndReady = false;
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+void AStaticInteractable::SetupInteractableInputComponent(UInputComponent * InteractableInputComponent)
+{
+	InteractableInputComponent->BindAction("Interact", IE_Pressed, this, &AStaticInteractable::OnInteractPressed);
+	InteractableInputComponent->BindAction("Interact", IE_Released, this, &AStaticInteractable::OnInteractReleased);
+}
+
 
 void AStaticInteractable::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
@@ -53,8 +106,14 @@ void AStaticInteractable::OnOverlapEnd(UPrimitiveComponent * OverlappedComp, AAc
 	}
 }
 
-void AStaticInteractable::OnInteractReady()
+void AStaticInteractable::OnInteractPressed()
 {
-	bInteractReady = true;
+	bInteractPressed = true;
+	
+}
+
+void AStaticInteractable::OnInteractReleased()
+{
+	bInteractPressed = false;
 }
 

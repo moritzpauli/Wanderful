@@ -71,7 +71,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UCameraShake> MyShake;
 	UPROPERTY(EditAnywhere)
-		UCameraShake* MyShakeUC;
+	UCameraShake* MyShakeUC;
 	UPROPERTY(EditAnywhere)
 	class APickUp* CurrentItem;
 
