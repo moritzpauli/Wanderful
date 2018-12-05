@@ -21,40 +21,41 @@ AStaticInteractable::AStaticInteractable()
 	bInteracting = false;
 	bInView = false;
 	bInRange = false;
-	bInteractEndReady = false;
-	
+	bInteractEndReadyOne = false;
+	bInteractEndReadyTwo = false;
+	bInteractPressed = false;
 }
 
 // Called when the game starts or when spawned
 void AStaticInteractable::BeginPlay()
 {
 	Super::BeginPlay();
-	EnableInput(GetWorld()->GetFirstPlayerController());
-	UInputComponent* myInputComponent = this->InputComponent;
-	if (myInputComponent) {
-		SetupInteractableInputComponent(myInputComponent);
-
-	}
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFPSwanderfulCharacter::StaticClass(), MyPlayers);
+	MyPlayer = Cast<AFPSwanderfulCharacter>(MyPlayers[0]);
 	
 }
 
 // Called every frame
 void AStaticInteractable::Tick(float DeltaTime)
 {
+	
 	Super::Tick(DeltaTime);
-
+	bInteractPressed = MyPlayer->GetInteractPressed();
 	if (bInRange && bInView && !bInteracting) {
 		if (bInteractPressed) {
 			OnInteract();
 		}
 	}
 	if (bInteracting && !bInteractPressed) {
-		bInteractEndReady = true;
+		bInteractEndReadyOne = true;
 	}
-	if (bInteractEndReady && bInteractPressed) {
+	if (bInteractEndReadyOne && bInteractPressed) {
+		bInteractEndReadyTwo = true;
+	}
+	if (bInteractEndReadyTwo && !bInteractPressed) {
 		OnInteractEnd();
 	}
-
+	
 }
 
 
@@ -64,14 +65,17 @@ void AStaticInteractable::OnInteract()
 	bInteracting = true;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFPSwanderfulCharacter::StaticClass(), MyPlayers);
 	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bCanMove = false;
+	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bFreeView = false;
+	
 }
 
 void AStaticInteractable::OnInteractEnd() {
 	bInteracting = false;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFPSwanderfulCharacter::StaticClass(), MyPlayers);
 	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bCanMove = true;
-	bInteractEndReady = false;
-	
+	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bFreeView = true;
+	bInteractEndReadyOne = false;
+	bInteractEndReadyTwo = false;
 }
 
 
@@ -84,11 +88,7 @@ void AStaticInteractable::OnInteractEnd() {
 
 
 
-void AStaticInteractable::SetupInteractableInputComponent(UInputComponent * InteractableInputComponent)
-{
-	InteractableInputComponent->BindAction("Interact", IE_Pressed, this, &AStaticInteractable::OnInteractPressed);
-	InteractableInputComponent->BindAction("Interact", IE_Released, this, &AStaticInteractable::OnInteractReleased);
-}
+
 
 
 void AStaticInteractable::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
@@ -106,14 +106,4 @@ void AStaticInteractable::OnOverlapEnd(UPrimitiveComponent * OverlappedComp, AAc
 	}
 }
 
-void AStaticInteractable::OnInteractPressed()
-{
-	bInteractPressed = true;
-	
-}
-
-void AStaticInteractable::OnInteractReleased()
-{
-	bInteractPressed = false;
-}
 

@@ -33,6 +33,7 @@ void APickUp::BeginPlay()
 	mesh->SetRenderCustomDepth(false);
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(),AFPSwanderfulCharacter::StaticClass() ,MyPlayers);
 	MyPlayer = Cast<AFPSwanderfulCharacter>(MyPlayers[0]);
+	mesh->MoveIgnoreActors.Add(MyPlayer);
 	PlayerCamera = MyPlayer->FindComponentByClass<UCameraComponent>();
 
 	TArray<USceneComponent*> Components;

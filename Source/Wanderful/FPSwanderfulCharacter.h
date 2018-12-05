@@ -34,6 +34,9 @@ public:
 	//FPostProcessSettings InspectBlurSettings;
 	UPROPERTY(EditAnywhere)
 	bool bFire;
+	bool InteractPressed;
+	UPROPERTY(EditAnywhere)
+	bool bFreeView;
 
 protected:
 	// Called when the game starts or when spawned
@@ -83,6 +86,10 @@ public:
 	float whackspeed;
 	UPROPERTY(EditAnywhere)
 	float whacklimit;
+	UPROPERTY(EditAnywhere)
+	float MouseSensX;
+	UPROPERTY(EditAnywhere)
+	float MouseSensY;
 
 	bool bCanMove;
 	bool bHoldingPickUp;
@@ -110,6 +117,7 @@ public:
 
 	void ToggleMovement();
 	void ToggleItemPU();
-
+	void InteractEnd() { InteractPressed = false; };
+	bool GetInteractPressed() { return InteractPressed; };
 	
 };

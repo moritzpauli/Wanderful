@@ -24,11 +24,19 @@ public:
 	UPROPERTY(EditAnywhere)
 	USceneComponent* PumpHandleComp;
 	UPROPERTY(EditAnywhere)
+	class UParticleSystemComponent* WaterStream;
+	UPROPERTY(EditAnywhere)
 	float rotMax;
 	UPROPERTY(EditAnywhere)
 	float rotMin;
 	UPROPERTY(EditAnywhere)
 	float rotStep;
+	UPROPERTY(EditAnywhere)
+	float cMouseX;
+	UPROPERTY(EditAnywhere)
+	float cMouseY;
+	UPROPERTY(EditAnywhere)
+	FRotator TestRotator;
 
 protected:
 	// Called when the game starts or when spawned
@@ -36,8 +44,12 @@ protected:
 	bool bGetMouse;
 	float MouseX;
 	float MouseY;
-	float cMouseX;
-	float cMouseY;
+	float midRot;
+	int StartCount;
+	int Counter;
+	bool bHitMiddle;
+	bool bHitEnd;
+	bool bHitStart;
 
 public:
 	// Called every frame

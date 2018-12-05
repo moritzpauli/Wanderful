@@ -33,6 +33,8 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	MyShakeUC = Cast<UCameraShake>(MyShake);
 	bBobStraight = false;
 	bBobStrafe = false;
+	InteractPressed = false;
+	bFreeView = true;
 }
 
 // Called when the game starts or when spawned
@@ -47,6 +49,9 @@ void AFPSwanderfulCharacter::BeginPlay()
 	rotationMax = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax;
 	rotationMin = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMin;
 	InspectBlur->bEnabled = false;
+	GetWorld()->GetFirstPlayerController()->InputPitchScale = MouseSensY * (-1);
+	GetWorld()->GetFirstPlayerController()->InputYawScale = MouseSensX;
+	
 }
 
 
@@ -142,6 +147,16 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 			}
 		}
 	}
+
+	if (bFreeView) {
+		GetWorld()->GetFirstPlayerController()->InputPitchScale = MouseSensY * (-1);
+		GetWorld()->GetFirstPlayerController()->InputYawScale = MouseSensX;
+	}
+	if (!bFreeView) {
+		GetWorld()->GetFirstPlayerController()->InputPitchScale = 0;
+		GetWorld()->GetFirstPlayerController()->InputYawScale = 0;
+	}
+
 }
 
 
@@ -191,6 +206,7 @@ void AFPSwanderfulCharacter::Drop()
 
 void AFPSwanderfulCharacter::Interact()
 {
+	InteractPressed = true;
 	if (CurrentItem && !bInspecting) {
 		ToggleItemPU();
 	}
@@ -283,6 +299,7 @@ void AFPSwanderfulCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	PlayerInputComponent->BindAxis("LookUp", this, &AFPSwanderfulCharacter::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("TurnRate", this, &AFPSwanderfulCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AFPSwanderfulCharacter::AddControllerPitchInput);
+	
 
 	//jumping
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFPSwanderfulCharacter::StartJump);
@@ -292,6 +309,7 @@ void AFPSwanderfulCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	//PlayerInputComponent->BindAction("InteractMain", IE_Pressed, this, &AFPSwanderfulCharacter::Interact);
 	//PlayerInputComponent->BindAction("InteractSide", IE_Pressed, this, &AFPSwanderfulCharacter::Drop);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AFPSwanderfulCharacter::Interact);
+	PlayerInputComponent->BindAction("Interact", IE_Released, this, &AFPSwanderfulCharacter::InteractEnd);
 	PlayerInputComponent->BindAction("Inspect", IE_Pressed, this, &AFPSwanderfulCharacter::OnInspect);
 	PlayerInputComponent->BindAction("Inspect", IE_Released, this, &AFPSwanderfulCharacter::OnInspectReleased);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSwanderfulCharacter::OnFiring);
