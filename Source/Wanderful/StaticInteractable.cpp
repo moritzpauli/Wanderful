@@ -64,7 +64,9 @@ void AStaticInteractable::OnInteract()
 	UE_LOG(LogTemp, Warning, TEXT("Static Interact Time "));
 	bInteracting = true;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFPSwanderfulCharacter::StaticClass(), MyPlayers);
+	if(bLockMovement)
 	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bCanMove = false;
+	if(bLockView)
 	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bFreeView = false;
 	
 }
@@ -72,7 +74,9 @@ void AStaticInteractable::OnInteract()
 void AStaticInteractable::OnInteractEnd() {
 	bInteracting = false;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFPSwanderfulCharacter::StaticClass(), MyPlayers);
+	if(bLockMovement)
 	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bCanMove = true;
+	if(bLockView)
 	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bFreeView = true;
 	bInteractEndReadyOne = false;
 	bInteractEndReadyTwo = false;

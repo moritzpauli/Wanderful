@@ -24,8 +24,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	USceneComponent* PumpHandleComp;
 	UPROPERTY(EditAnywhere)
-	class UParticleSystemComponent* WaterStream;
-	UPROPERTY(EditAnywhere)
 	float rotMax;
 	UPROPERTY(EditAnywhere)
 	float rotMin;
@@ -37,6 +35,8 @@ public:
 	float cMouseY;
 	UPROPERTY(EditAnywhere)
 	FRotator TestRotator;
+	UPROPERTY(EditAnywhere)
+	class UParticleSystemComponent* WaterfStream;
 
 protected:
 	// Called when the game starts or when spawned

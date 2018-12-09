@@ -27,6 +27,8 @@ public:
 	bool bInteracting;
 	UPROPERTY(EditAnywhere)
 	bool bLockView;
+	UPROPERTY(EditAnywhere)
+	bool bLockMovement;
 	TArray<AActor*> MyPlayers;
 	class AFPSwanderfulCharacter* MyPlayer;
 	
