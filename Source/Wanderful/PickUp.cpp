@@ -34,6 +34,8 @@ void APickUp::BeginPlay()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(),AFPSwanderfulCharacter::StaticClass() ,MyPlayers);
 	MyPlayer = Cast<AFPSwanderfulCharacter>(MyPlayers[0]);
 	mesh->MoveIgnoreActors.Add(MyPlayer);
+	mesh->IgnoreActorWhenMoving(MyPlayer,true);
+	mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel12, ECollisionResponse::ECR_Ignore);
 	PlayerCamera = MyPlayer->FindComponentByClass<UCameraComponent>();
 
 	TArray<USceneComponent*> Components;

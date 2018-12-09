@@ -51,7 +51,7 @@ void AFPSwanderfulCharacter::BeginPlay()
 	InspectBlur->bEnabled = false;
 	GetWorld()->GetFirstPlayerController()->InputPitchScale = MouseSensY * (-1);
 	GetWorld()->GetFirstPlayerController()->InputYawScale = MouseSensX;
-	
+
 }
 
 
@@ -169,7 +169,7 @@ bool AFPSwanderfulCharacter::CastRay(FHitResult  &HitResult)
 	//Direction
 	FVector ForwardVector = Camera->GetForwardVector();
 	//length
-	FVector EndTrace = ((ForwardVector*200.f) + StartTrace);
+	FVector EndTrace = ((ForwardVector*500.f) + StartTrace);
 	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
 	//DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Magenta, true);
 	return GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams);
