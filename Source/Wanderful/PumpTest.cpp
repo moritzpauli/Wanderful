@@ -9,7 +9,7 @@
 APumpTest::APumpTest() {
 	PumpHandle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PumpHandle"));
 	PumpHandleComp = CreateDefaultSubobject<USceneComponent>(TEXT("PumpHandleComp"));
-	WaterStream = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("WaterStream"));
+	WaterfStream = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("PumpWater"));
 	bGetMouse = false;
 	PumpHandle->SetupAttachment(PumpHandleComp);
 	
@@ -21,7 +21,8 @@ void APumpTest::BeginPlay()
 	Super::BeginPlay();
 	midRot = (rotMax + rotMin) / 2;
 	PumpHandleComp->SetRelativeRotation(FRotator(midRot,0,0));
-	WaterStream->Deactivate();
+	if(WaterfStream)
+	WaterfStream->Deactivate();
 
 }
 
@@ -63,7 +64,8 @@ void APumpTest::PumpAction()
 	}
 	if (Counter >= StartCount) {
 		UE_LOG(LogTemp, Warning, TEXT("Wasser arsch"));
-		WaterStream->Activate();
+		if(WaterfStream)
+		WaterfStream->Activate();
 	}
 	TestRotator = PumpHandleComp->RelativeRotation;
 
