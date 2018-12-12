@@ -51,7 +51,7 @@ void APhotoCamera::BeginPlay()
 		SaveGameInstance = Cast<UGameSaves>(UGameplayStatics::LoadGameFromSlot("MySlot", 0));
 		PictureCounter = SaveGameInstance->ImageIndex;
 	}
-
+	Cast<UTextWidget>(CameraOverlay)->DisplayText = ToDisplayText.FromString(FString::FromInt(filmstock));
 }
 
 // Called every frame
@@ -60,6 +60,7 @@ void APhotoCamera::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (bFocusBlur) {
 		//PhotoPostProcessing->BlendWeight = 1.0f;
+		
 	}
 
 }
@@ -68,7 +69,7 @@ void APhotoCamera::Tick(float DeltaTime)
 void APhotoCamera::TakePhoto() {
 	if (bCameraMode && filmstock > 0) {
 
-		if (bFocused) {
+		/*if (bFocused) {*/
 			UE_LOG(LogTemp, Warning, TEXT("klick klack"));
 			PathUpictures.Append(FString::FromInt(PictureCounter));
 			PathUpictures.Append(TEXT(".png"));
@@ -83,10 +84,11 @@ void APhotoCamera::TakePhoto() {
 			}
 			PictureCounter++;
 			filmstock--;
+			Cast<UTextWidget>(CameraOverlay)->DisplayText = ToDisplayText.FromString(FString::FromInt(filmstock));
 			SaveGameInstance->ImageIndex = PictureCounter;
 			UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("MySlot"), 0);
 			bFocused = false;
-		}
+		//}
 
 
 	}
@@ -101,7 +103,8 @@ void APhotoCamera::EnterCameraMode()
 		PlayerCam->PostProcessSettings = PhotoPostProcessing;
 		MyPlayer->bPhotoCamera = true;
 		CameraOverlay->AddToViewport();
-		//CameraOverlay->SetDisplayText(TEXT("fuck"));
+		
+
 	}
 	if (!bCameraMode) {
 		PlayerCam->PostProcessSettings = OgPostProcessing;

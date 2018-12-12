@@ -21,6 +21,8 @@ public:
 	int filmstock;
 	UPROPERTY(EditAnywhere)
 	class UUserWidget* CameraOverlay;
+	UPROPERTY(EditAnywhere)
+	FText ToDisplayText;
 
 protected:
 	FString Testpath;
