@@ -14,16 +14,33 @@ class WANDERFUL_API APhotoCamera : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APhotoCamera();
+	UPROPERTY(EditAnywhere)
+	bool bCameraMode;
+	UPROPERTY(EditAnywhere)
+	struct FPostProcessSettings PhotoPostProcessing;
+	int filmstock;
+	UPROPERTY(EditAnywhere)
+	class UUserWidget* CameraOverlay;
 
 protected:
 	FString Testpath;
 	FString PathUpictures;
 	int PictureCounter;
+	class AFPSwanderfulCharacter* MyPlayer;
+	TArray<AActor*> MyPlayers;
+	FPostProcessSettings OgPostProcessing;
+	class UCameraComponent* PlayerCam;
+	class UGameSaves* SaveGameInstance;
+	bool bFocusBlur;
+	bool bFocused;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	void TakePhoto();
+	void EnterCameraMode();
+	void ExitCameraMode();
+	void DeleteSave();
 
 public:	
 	// Called every frame

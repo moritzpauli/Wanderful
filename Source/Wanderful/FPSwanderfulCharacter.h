@@ -37,6 +37,7 @@ public:
 	bool InteractPressed;
 	UPROPERTY(EditAnywhere)
 	bool bFreeView;
+	bool bPhotoCamera;
 
 protected:
 	// Called when the game starts or when spawned

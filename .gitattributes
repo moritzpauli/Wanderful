@@ -1,1 +1,10 @@
 Content/ filter=lfs diff=lfs merge=lfs -text
+Z_lfs_test/ filter=lfs diff=lfs merge=lfs -text
+.umaps filter=lfs diff=lfs merge=lfs -text
+Saves/ filter=lfs diff=lfs merge=lfs -text
+Saved/ filter=lfs diff=lfs merge=lfs -text
+Build/ filter=lfs diff=lfs merge=lfs -text
+Intermediate/ filter=lfs diff=lfs merge=lfs -text
+*.umap filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*pack filter=lfs diff=lfs merge=lfs -text
