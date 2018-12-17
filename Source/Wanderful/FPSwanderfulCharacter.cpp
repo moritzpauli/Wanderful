@@ -6,6 +6,7 @@
 #include "Pickup.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "FilmRoll.h"
 
 
 
@@ -28,6 +29,7 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	bCanMove = true;
 	bInspecting = false;
 	InspectBlur = CreateDefaultSubobject<UPostProcessComponent>("InspectBlur");
+	FocusBlur = CreateDefaultSubobject<UPostProcessComponent>("FocusBlur");
 	StartWhackRotation = 69.0f;
 	bFire = false;
 	MyShakeUC = Cast<UCameraShake>(MyShake);
@@ -36,6 +38,7 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	InteractPressed = false;
 	bFreeView = true;
 	bPhotoCamera = false;
+	bFilmRoll = false;
 }
 
 // Called when the game starts or when spawned
@@ -62,10 +65,16 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FHitResult hit;
 
 	if (!bHoldingPickUp) {
 		if (CastRay(hit)) {
+
+			if (hit.GetActor()->GetClass()->IsChildOf(AFilmRoll::StaticClass()) && !bPhotoCamera) {
+				bFilmRoll = true;
+			}
+			else {
+				bFilmRoll = false;
+			}
 
 			if (hit.GetActor()->GetClass()->IsChildOf(AStaticInteractable::StaticClass())) {
 				CurrentInView = Cast<AStaticInteractable>(hit.GetActor());
@@ -88,6 +97,9 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 				//UE_LOG(LogTemp, Warning, TEXT("%s"), hit.GetActor()->GetClass()->GetName() );
 
 				UE_LOG(LogTemp, Warning, TEXT("hitit"));
+			}
+			else {
+				CurrentItem = NULL;
 			}
 			if (CurrentItem != nullptr) {
 				FString ItemName = CurrentItem->GetName();
@@ -119,6 +131,7 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 			}
 		}
 		else {
+			if(!bPhotoCamera)
 			Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 45.0f, 0.1f));
 		}
 
@@ -171,9 +184,9 @@ bool AFPSwanderfulCharacter::CastRay(FHitResult  &HitResult)
 	//Direction
 	FVector ForwardVector = Camera->GetForwardVector();
 	//length
-	FVector EndTrace = ((ForwardVector*500.f) + StartTrace);
+	FVector EndTrace = ((ForwardVector*800.f) + StartTrace);
 	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
-	//DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Magenta, true);
+	DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green , true);
 	return GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams);
 
 
@@ -208,6 +221,10 @@ void AFPSwanderfulCharacter::Drop()
 
 void AFPSwanderfulCharacter::Interact()
 {
+
+	if (bFilmRoll) {
+		Cast<AFilmRoll>(hit.GetActor())->OnPickUp();
+	}
 	if (!bPhotoCamera) {
 		InteractPressed = true;
 		if (CurrentItem && !bInspecting) {
@@ -280,8 +297,10 @@ void AFPSwanderfulCharacter::ToggleItemPU()
 
 		bHoldingPickUp = !bHoldingPickUp;
 		CurrentItem->PickUpObject();
+		Inventory = CurrentItem;
 		if (!bHoldingPickUp) {
 			CurrentItem = NULL;
+			Inventory = NULL;
 		}
 	}
 }

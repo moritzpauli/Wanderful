@@ -30,6 +30,8 @@ public:
 	AActor* Inventory;	
 	UPROPERTY(EditAnywhere)
 	class UPostProcessComponent* InspectBlur;
+	UPROPERTY(EditAnywhere)
+	class UPostProcessComponent* FocusBlur;
 	//UPROPERTY(EditAnywhere)
 	//FPostProcessSettings InspectBlurSettings;
 	UPROPERTY(EditAnywhere)
@@ -54,9 +56,11 @@ protected:
 
 protected:
 	bool bBacklash;
+	bool bFilmRoll;
 	float StartWhackRotation;
 	bool bBobStrafe;
 	bool bBobStraight;
+	FHitResult hit;
 	
 
 

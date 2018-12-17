@@ -22,7 +22,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UUserWidget* CameraOverlay;
 	UPROPERTY(EditAnywhere)
-	FText ToDisplayText;
+	FWeightedBlendables MyBlurArray;
+	UPROPERTY(EditAnywhere)
+	FWeightedBlendable MyBlur;
+	
 
 protected:
 	FString Testpath;
@@ -34,12 +37,20 @@ protected:
 	class UCameraComponent* PlayerCam;
 	class UGameSaves* SaveGameInstance;
 	bool bFocusBlur;
-	bool bFocused;
+	bool bFocusComplete;
+	bool bShotTaken;
+	bool bInFocus;
+	bool bShutterClosed;
+	float shutterspeed;
+	float focusspeed;
+	class UPostProcessComponent* PlayerPP;
+	FText test;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	void TakePhoto();
+	void Exposure();
 	void EnterCameraMode();
 	void ExitCameraMode();
 	void DeleteSave();
@@ -48,6 +59,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void SetupPhotoInputComponent(UInputComponent* PhotoInputComponent);
+	void AddFilmRoll();
 	
 	
 };

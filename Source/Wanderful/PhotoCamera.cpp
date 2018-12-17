@@ -12,6 +12,7 @@
 
 
 
+
 // Sets default values
 APhotoCamera::APhotoCamera()
 {
@@ -22,7 +23,12 @@ APhotoCamera::APhotoCamera()
 	bCameraMode = false;
 	filmstock = 24;
 	bFocusBlur = false;
-	bFocused = false;
+	bFocusComplete = false;
+	bShotTaken = false;
+	bShutterClosed = false;
+	shutterspeed = 0.2f;
+	focusspeed = 0.08f;
+	bInFocus = false;
 }
 
 // Called when the game starts or when spawned
@@ -45,13 +51,18 @@ void APhotoCamera::BeginPlay()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFPSwanderfulCharacter::StaticClass(), MyPlayers);
 	MyPlayer = Cast<AFPSwanderfulCharacter>(MyPlayers[0]);
 	PlayerCam = MyPlayer->Camera;
+	PlayerPP = MyPlayer->FocusBlur;
+	PlayerPP->BlendWeight = 0.0f;
+	
 	OgPostProcessing = PlayerCam->PostProcessSettings;
 	SaveGameInstance = Cast<UGameSaves>(UGameplayStatics::CreateSaveGameObject(UGameSaves::StaticClass()));
 	if (UGameplayStatics::DoesSaveGameExist(TEXT("MySlot"), 0)) {
 		SaveGameInstance = Cast<UGameSaves>(UGameplayStatics::LoadGameFromSlot("MySlot", 0));
 		PictureCounter = SaveGameInstance->ImageIndex;
 	}
-	Cast<UTextWidget>(CameraOverlay)->DisplayText = ToDisplayText.FromString(FString::FromInt(filmstock));
+
+	if (&Cast<UTextWidget>(CameraOverlay)->DisplayText != nullptr)
+		Cast<UTextWidget>(CameraOverlay)->DisplayText = FText::FromString(FString::FromInt(filmstock));
 }
 
 // Called every frame
@@ -59,51 +70,90 @@ void APhotoCamera::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (bFocusBlur) {
-		//PhotoPostProcessing->BlendWeight = 1.0f;
+		if (!bInFocus) {
+			PlayerPP->BlendWeight += focusspeed;
+		}
+		if (PlayerPP->BlendWeight >= 1.0f) {
+			bInFocus = true;
+		}
+		if (bInFocus) {
+			PlayerPP->BlendWeight -= focusspeed;
+			if (PlayerPP->BlendWeight == 0) {
+				UE_LOG(LogTemp, Warning, TEXT("back in FF"));
+				bInFocus = false;
+				bFocusBlur = false;
+				bFocusComplete = true;
+				Exposure();
+			}
+		}
 		
 	}
-
+	if (bShotTaken) {
+		if (!bShutterClosed) {
+			Cast<UTextWidget>(CameraOverlay)->ImageColor.A += shutterspeed;
+		}
+		if (Cast<UTextWidget>(CameraOverlay)->ImageColor.A > 1.0f) {
+			bShutterClosed = true;
+			UE_LOG(LogTemp, Warning, TEXT("shutter closed"));
+		}
+		if (bShutterClosed) {
+			Cast<UTextWidget>(CameraOverlay)->ImageColor.A -= shutterspeed;
+			if (Cast<UTextWidget>(CameraOverlay)->ImageColor.A <= 0) {
+				bShutterClosed = false;
+				bShotTaken = false;
+			}
+		}
+	}
+	
 }
 
 
 void APhotoCamera::TakePhoto() {
 	if (bCameraMode && filmstock > 0) {
-
-		/*if (bFocused) {*/
-			UE_LOG(LogTemp, Warning, TEXT("klick klack"));
-			PathUpictures.Append(FString::FromInt(PictureCounter));
-			PathUpictures.Append(TEXT(".png"));
-			FScreenshotRequest::RequestScreenshot(PathUpictures, false, false);
-			char* CharPath = TCHAR_TO_ANSI(*PathUpictures);
-			for (int i = 0; i < PathUpictures.Len(); i++) {
-				if (CharPath[i] == '1' || CharPath[i] == '2' || CharPath[i] == '3' || CharPath[i] == '4' || CharPath[i] == '5' ||
-					CharPath[i] == '6' || CharPath[i] == '7' || CharPath[i] == '8' || CharPath[i] == '9') {
-					PathUpictures.RemoveAt(i, PathUpictures.Len() - i);
-					UE_LOG(LogTemp, Warning, TEXT("%d"), PictureCounter);
-				}
-			}
-			PictureCounter++;
-			filmstock--;
-			Cast<UTextWidget>(CameraOverlay)->DisplayText = ToDisplayText.FromString(FString::FromInt(filmstock));
-			SaveGameInstance->ImageIndex = PictureCounter;
-			UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("MySlot"), 0);
-			bFocused = false;
-		//}
+		bFocusBlur = true;
+		if (bFocusComplete) {
+		
+		}
 
 
 	}
 
 }
 
+void APhotoCamera::Exposure()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("klick klack"));
+	PathUpictures.Append(FString::FromInt(PictureCounter));
+	PathUpictures.Append(TEXT(".png"));
+	FScreenshotRequest::RequestScreenshot(PathUpictures, false, false);
+	char* CharPath = TCHAR_TO_ANSI(*PathUpictures);
+	for (int i = 0; i < PathUpictures.Len(); i++) {
+		if (CharPath[i] == '1' || CharPath[i] == '2' || CharPath[i] == '3' || CharPath[i] == '4' || CharPath[i] == '5' ||
+			CharPath[i] == '6' || CharPath[i] == '7' || CharPath[i] == '8' || CharPath[i] == '9') {
+			PathUpictures.RemoveAt(i, PathUpictures.Len() - i);
+			UE_LOG(LogTemp, Warning, TEXT("%d"), PictureCounter);
+		}
+	}
+	PictureCounter++;
+	filmstock--;
+	if (&Cast<UTextWidget>(CameraOverlay)->DisplayText != nullptr)
+		Cast<UTextWidget>(CameraOverlay)->DisplayText = FText::FromString(FString::FromInt(filmstock));
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("MySlot"), 0)) {
+		SaveGameInstance->ImageIndex = PictureCounter;
+		UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("MySlot"), 0);
+	}
+	bShotTaken = true;
+	bFocusComplete = false;
+}
+
 void APhotoCamera::EnterCameraMode()
 {
 	bCameraMode = !bCameraMode;
-	if (bCameraMode && MyPlayer->CurrentItem == NULL && MyPlayer->bCanMove == true) {
+	if (bCameraMode && MyPlayer->Inventory == NULL && MyPlayer->bCanMove == true) {
 		UE_LOG(LogTemp, Warning, TEXT("PhotoModeStart"));
 		PlayerCam->PostProcessSettings = PhotoPostProcessing;
 		MyPlayer->bPhotoCamera = true;
 		CameraOverlay->AddToViewport();
-		
 
 	}
 	if (!bCameraMode) {
@@ -134,6 +184,14 @@ void APhotoCamera::SetupPhotoInputComponent(UInputComponent* PhotoInputComponent
 	PhotoInputComponent->BindAction("CameraMode", IE_Pressed, this, &APhotoCamera::EnterCameraMode);
 	PhotoInputComponent->BindAction("CameraMode", IE_Released, this, &APhotoCamera::ExitCameraMode);
 	PhotoInputComponent->BindAction("DeleteSave", IE_Pressed, this, &APhotoCamera::DeleteSave);
+
+}
+
+void APhotoCamera::AddFilmRoll()
+{
+	filmstock += 24;
+	if (&Cast<UTextWidget>(CameraOverlay)->DisplayText != nullptr)
+		Cast<UTextWidget>(CameraOverlay)->DisplayText = FText::FromString(FString::FromInt(filmstock));
 
 }
 
