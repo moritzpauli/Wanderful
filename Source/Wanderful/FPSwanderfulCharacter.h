@@ -32,6 +32,8 @@ public:
 	class UPostProcessComponent* InspectBlur;
 	UPROPERTY(EditAnywhere)
 	class UPostProcessComponent* FocusBlur;
+	UPROPERTY(EditAnywhere)
+	bool bPuzzlePu;
 	//UPROPERTY(EditAnywhere)
 	//FPostProcessSettings InspectBlurSettings;
 	UPROPERTY(EditAnywhere)
@@ -40,17 +42,18 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bFreeView;
 	bool bPhotoCamera;
+	UPROPERTY(EditAnywhere)
+	AActor* CurrentInView;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	bool CastRay(FHitResult &HitResult);
 	void Interact();
-	void Drop();
 	void OnInspect();
 	void OnInspectReleased();
 	void OnFiring();
-	AStaticInteractable* CurrentInView;
+	
 	
 
 

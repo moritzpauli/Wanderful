@@ -37,6 +37,7 @@ public:
 	bool setTimer;
 	bool gravity;
 	bool bInspecting;
+	bool bPuzzlePlaced;
 
 	UPROPERTY(EditAnywhere)
 	bool throwable;
@@ -44,6 +45,11 @@ public:
 	bool wieldable;
 	UPROPERTY(EditAnywhere)
 	bool inspectable;
+	UPROPERTY(EditAnywhere)
+	bool puzzleitem;
+	UPROPERTY(EditAnywhere)
+	bool puzzlepu;
+
 	
 
 	UFUNCTION()

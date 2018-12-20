@@ -7,6 +7,7 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "FilmRoll.h"
+#include "PuzzleItemSpot.h"
 
 
 
@@ -65,9 +66,49 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	/*if (Inventory) {
+		bPuzzlePu = Cast<APickUp>(Inventory)->puzzlepu;
+	}*/
+
+	if (CastRay(hit)) {
+		if (hit.GetActor()->GetClass()->IsChildOf(APuzzleItemSpot::StaticClass())) {
+			if (Cast<APuzzleItemSpot>(hit.GetActor())->ClueItem == Inventory) {
+				if (!bPhotoCamera) {
+					CurrentInView = hit.GetActor();
+					Cast<APuzzleItemSpot>(hit.GetActor())->bInView = true;
+				}
+				if (InteractPressed) {
+					Cast<APuzzleItemSpot>(hit.GetActor())->SetInPosition();
+					//UE_LOG(LogTemp, Warning, TEXT("Inposition"));
+					//Cast<APickUp>(Inventory)->bPuzzlePlaced = true;
+					Inventory->Destroy();
+					Inventory = NULL;
+					CurrentItem = NULL;
+				}
+			}
+		}
+		else {
+			if (CurrentInView) {
+				if (CurrentInView->GetClass()->IsChildOf(APuzzleItemSpot::StaticClass())) {
+					Cast<APuzzleItemSpot>(CurrentInView)->bInView = false;
+				}
+			}
+		}
+	}
+	else
+	{
+		CurrentItem = NULL;
+		if (CurrentInView) {
+			if (CurrentInView->GetClass()->IsChildOf(APuzzleItemSpot::StaticClass())) {
+				Cast<APuzzleItemSpot>(CurrentInView)->bInView = false;
+			}
+		}
+	}
 
 	if (!bHoldingPickUp) {
 		if (CastRay(hit)) {
+
+
 
 			if (hit.GetActor()->GetClass()->IsChildOf(AFilmRoll::StaticClass()) && !bPhotoCamera) {
 				bFilmRoll = true;
@@ -77,12 +118,14 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 			}
 
 			if (hit.GetActor()->GetClass()->IsChildOf(AStaticInteractable::StaticClass())) {
-				CurrentInView = Cast<AStaticInteractable>(hit.GetActor());
-				CurrentInView->bInView = true;
+				CurrentInView = hit.GetActor();
+				Cast<AStaticInteractable>(CurrentInView)->bInView = true;
 			}
 			else {
 				if (CurrentInView) {
-					CurrentInView->bInView = false;
+					if (CurrentInView->GetClass()->IsChildOf(AStaticInteractable::StaticClass())) {
+						Cast<AStaticInteractable>(CurrentInView)->bInView = false;
+					}
 				}
 			}
 
@@ -96,21 +139,23 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 
 				//UE_LOG(LogTemp, Warning, TEXT("%s"), hit.GetActor()->GetClass()->GetName() );
 
-				UE_LOG(LogTemp, Warning, TEXT("hitit"));
+				//UE_LOG(LogTemp, Warning, TEXT("hitit"));
 			}
 			else {
 				CurrentItem = NULL;
 			}
 			if (CurrentItem != nullptr) {
 				FString ItemName = CurrentItem->GetName();
-				UE_LOG(LogTemp, Warning, TEXT("You are already carrying. %s"), *ItemName);
+				//UE_LOG(LogTemp, Warning, TEXT("You are already carrying. %s"), *ItemName);
 			}
 		}
 		else
 		{
 			CurrentItem = NULL;
 			if (CurrentInView) {
-				CurrentInView->bInView = false;
+				if (CurrentInView->GetClass()->IsChildOf(AStaticInteractable::StaticClass())) {
+					Cast<AStaticInteractable>(CurrentInView)->bInView = false;
+				}
 			}
 		}
 
@@ -131,8 +176,8 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 			}
 		}
 		else {
-			if(!bPhotoCamera)
-			Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 45.0f, 0.1f));
+			if (!bPhotoCamera)
+				Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 45.0f, 0.1f));
 		}
 
 
@@ -186,7 +231,7 @@ bool AFPSwanderfulCharacter::CastRay(FHitResult  &HitResult)
 	//length
 	FVector EndTrace = ((ForwardVector*800.f) + StartTrace);
 	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
-	DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green , true);
+	DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green, true);
 	return GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams);
 
 
@@ -195,28 +240,7 @@ bool AFPSwanderfulCharacter::CastRay(FHitResult  &HitResult)
 
 
 
-void AFPSwanderfulCharacter::Drop()
-{
-	if (Inventory != nullptr) {
 
-
-		APickUp* myPickUp = Cast<APickUp>(Inventory);
-		//myPickUp->SetActorLocation(GetActorLocation() + FVector(0, 0, 0));
-		FVector PlayerPos = GetActorLocation();
-		myPickUp->SetActorLocation(PlayerPos), false, NULL, ETeleportType::TeleportPhysics;
-		myPickUp->SetPu(false);
-
-
-
-
-		Inventory = nullptr;
-
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("Your Inventory is empty!"));
-	}
-
-}
 
 
 void AFPSwanderfulCharacter::Interact()
@@ -299,8 +323,10 @@ void AFPSwanderfulCharacter::ToggleItemPU()
 		CurrentItem->PickUpObject();
 		Inventory = CurrentItem;
 		if (!bHoldingPickUp) {
-			CurrentItem = NULL;
-			Inventory = NULL;
+			if (!Cast<APickUp>(Inventory)->puzzlepu) {
+				Inventory = NULL;
+				CurrentItem = NULL;
+			}
 		}
 	}
 }
