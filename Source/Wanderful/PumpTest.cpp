@@ -3,6 +3,7 @@
 #include "PumpTest.h"
 #include "Engine/World.h"
 #include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 
 //SetsDefaultValues
@@ -10,8 +11,11 @@ APumpTest::APumpTest() {
 	PumpHandle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PumpHandle"));
 	PumpHandleComp = CreateDefaultSubobject<USceneComponent>(TEXT("PumpHandleComp"));
 	WaterfStream = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("PumpWater"));
+	SteelRod = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rod"));
 	bGetMouse = false;
 	PumpHandle->SetupAttachment(PumpHandleComp);
+	RodZmin = -18.0f;
+	RodZmax = 0.0f;
 	
 }
 
@@ -20,7 +24,7 @@ void APumpTest::BeginPlay()
 {
 	Super::BeginPlay();
 	midRot = (rotMax + rotMin) / 2;
-	PumpHandleComp->SetRelativeRotation(FRotator(midRot,0,0));
+	PumpHandleComp->SetRelativeRotation(FRotator(0,0,0));
 	if(WaterfStream)
 	WaterfStream->Deactivate();
 
@@ -43,16 +47,18 @@ void APumpTest::PumpAction()
 {
 	if (!bGetMouse) {
 		bGetMouse = true;
-		StartCount = FMath::RandRange(6, 12);
+		StartCount = FMath::RandRange(15, 25);
 		Counter = 0;
 	}
 	GetWorld()->GetFirstPlayerController()->GetMousePosition(cMouseX,cMouseY);
-	PumpHandleComp->SetRelativeRotation(FRotator(cMouseY/(598/(rotMin-rotMax)),0,0));
-	//UE_LOG(LogTemp, Warning, TEXT("%f"), PumpHandleComp->RelativeRotation.Pitch);
-	if (PumpHandleComp->RelativeRotation.Pitch <= rotMin-359.8f) {
+	PumpHandleComp->SetRelativeRotation(FRotator(0,0,cMouseY/(598/(rotMin-rotMax))));
+	SteelRod->SetRelativeLocation(FVector(0, 0, cMouseY /(598/(RodZmin-RodZmax))));
+	//UE_LOG(LogTemp, Warning, TEXT("%f"), PumpHandleComp->RelativeRotation.Roll);
+	//UE_LOG(LogTemp, Warning, TEXT("%f"), cMouseY);
+	if (PumpHandleComp->RelativeRotation.Roll >= rotMin) {
 		bHitEnd = true;
 	}
-	if (PumpHandleComp->RelativeRotation.Pitch >= rotMax-360.2f) {
+	if (PumpHandleComp->RelativeRotation.Roll <= rotMax) {
 		bHitStart = true;
 		
 	}

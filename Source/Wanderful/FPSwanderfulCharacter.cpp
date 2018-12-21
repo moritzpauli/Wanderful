@@ -84,6 +84,7 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 					Inventory->Destroy();
 					Inventory = NULL;
 					CurrentItem = NULL;
+					//bHoldingPickUp = false;
 				}
 			}
 		}
@@ -97,13 +98,17 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 	}
 	else
 	{
-		CurrentItem = NULL;
+		if (!bHoldingPickUp) {
+			CurrentItem = NULL;
+			
+		}
 		if (CurrentInView) {
 			if (CurrentInView->GetClass()->IsChildOf(APuzzleItemSpot::StaticClass())) {
 				Cast<APuzzleItemSpot>(CurrentInView)->bInView = false;
 			}
 		}
 	}
+
 
 	if (!bHoldingPickUp) {
 		if (CastRay(hit)) {
@@ -229,7 +234,7 @@ bool AFPSwanderfulCharacter::CastRay(FHitResult  &HitResult)
 	//Direction
 	FVector ForwardVector = Camera->GetForwardVector();
 	//length
-	FVector EndTrace = ((ForwardVector*800.f) + StartTrace);
+	FVector EndTrace = ((ForwardVector*500.f) + StartTrace);
 	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
 	DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green, true);
 	return GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams);

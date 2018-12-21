@@ -22,6 +22,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* PumpHandle;
 	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* SteelRod;
+	UPROPERTY(EditAnywhere)
 	USceneComponent* PumpHandleComp;
 	UPROPERTY(EditAnywhere)
 	float rotMax;
@@ -50,6 +52,8 @@ protected:
 	bool bHitMiddle;
 	bool bHitEnd;
 	bool bHitStart;
+	float RodZmin;
+	float RodZmax;
 
 public:
 	// Called every frame

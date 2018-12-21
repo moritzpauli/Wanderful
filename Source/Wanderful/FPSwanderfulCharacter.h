@@ -100,6 +100,7 @@ public:
 	float MouseSensY;
 
 	bool bCanMove;
+	UPROPERTY(EditAnywhere)
 	bool bHoldingPickUp;
 	bool bInspecting;
 
