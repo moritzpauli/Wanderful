@@ -122,7 +122,7 @@ void APickUp::PickUpObject()
 
 	if (!pickedUP && throwable) {
 		ForwardVector = PlayerCamera->GetForwardVector();
-		mesh->AddForce(ForwardVector * 80000 * mesh->GetMass());
+		mesh->AddForce(ForwardVector * 24000 * mesh->GetMass());
 	}
 	if (!pickedUP && !throwable) {
 		ForwardVector = PlayerCamera->GetForwardVector();

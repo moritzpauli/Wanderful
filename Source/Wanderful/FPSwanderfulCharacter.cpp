@@ -172,7 +172,7 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 		if (bHoldingPickUp) {
 			Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 90.0f, 0.1f));
 
-			HoldingComponent->SetRelativeLocation(FVector(75.0f, 0.0f, 0.0f));
+			HoldingComponent->SetRelativeLocation(FVector(80.0f, 0.0f, 0.0f));
 			StickHoldingComponent->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
 			StickHoldingComponent->SetRelativeRotation(FQuat(0, 0, 0, 0));
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = 179.9000000000002f;
@@ -238,7 +238,7 @@ bool AFPSwanderfulCharacter::CastRay(FHitResult  &HitResult)
 	//length
 	FVector EndTrace = ((ForwardVector*500.f) + StartTrace);
 	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
-	DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green, true);
+	//DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green, true);
 	return GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams);
 
 
