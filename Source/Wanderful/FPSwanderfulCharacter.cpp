@@ -81,7 +81,9 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 					Cast<APuzzleItemSpot>(hit.GetActor())->SetInPosition();
 					//UE_LOG(LogTemp, Warning, TEXT("Inposition"));
 					//Cast<APickUp>(Inventory)->bPuzzlePlaced = true;
-					Inventory->Destroy();
+					if (Inventory) {
+						Inventory->Destroy();
+					}
 					Inventory = NULL;
 					CurrentItem = NULL;
 					//bHoldingPickUp = false;
@@ -170,7 +172,7 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 		if (bHoldingPickUp) {
 			Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 90.0f, 0.1f));
 
-			HoldingComponent->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
+			HoldingComponent->SetRelativeLocation(FVector(75.0f, 0.0f, 0.0f));
 			StickHoldingComponent->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
 			StickHoldingComponent->SetRelativeRotation(FQuat(0, 0, 0, 0));
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = 179.9000000000002f;
