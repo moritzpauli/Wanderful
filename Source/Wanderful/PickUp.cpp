@@ -16,6 +16,7 @@ APickUp::APickUp()
 	RootComponent = mesh;
 	gravity = true;
 	pickedUP = false;
+	bPuzzlePlaced = false;
 }
 
 void APickUp::EnablePhysics()
@@ -28,6 +29,7 @@ void APickUp::EnablePhysics()
 // Called when the game starts or when spawned
 void APickUp::BeginPlay()
 {
+	
 	Super::BeginPlay();
 	pickedUP = false;
 	mesh->SetRenderCustomDepth(false);
@@ -120,7 +122,7 @@ void APickUp::PickUpObject()
 
 	if (!pickedUP && throwable) {
 		ForwardVector = PlayerCamera->GetForwardVector();
-		mesh->AddForce(ForwardVector * 80000 * mesh->GetMass());
+		mesh->AddForce(ForwardVector * 24000 * mesh->GetMass());
 	}
 	if (!pickedUP && !throwable) {
 		ForwardVector = PlayerCamera->GetForwardVector();
