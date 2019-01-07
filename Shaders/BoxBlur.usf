@@ -1,0 +1,23 @@
+static const int SceneTextureId = 14;
+float2 TexelSize = View.ViewSizeAndInvSize.zw;
+float2 UV = GetDefaultSceneTextureUV(Parameters, SceneTextureId);
+float4 PixelSum = float4(0, 0, 0,0);
+
+//return SceneTexture;
+
+for (int x = 0; x < Passes; x++)
+{
+  
+	PixelSum = float4(SceneTexture);
+	/*PixelSum = float4(SceneTexture, UV + float2(-TexelSize.x, TexelSize.y)) + 
+	float4(SceneTexture, UV + float2(0, TexelSize.y)) + float4(SceneTexture, UV + float2(TexelSize.x, TexelSize.y)) +
+	float4(SceneTexture, UV + float2(-TexelSize.x, 0)) + float4(SceneTexture, UV + float2(0, 0)) + float4(SceneTexture, UV + float2(TexelSize.x, 0)) +
+	float4(SceneTexture, UV + float2(-TexelSize.x, -TexelSize.y)) + float4(SceneTexture, UV + float2(0, -TexelSize.y)) + 
+	float4(SceneTexture, UV + float2(TexelSize.x, -TexelSize.y));*/
+
+}
+
+return 9/PixelSum;
+
+
+
