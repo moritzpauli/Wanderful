@@ -54,6 +54,7 @@ protected:
 	bool bHitStart;
 	float RodZmin;
 	float RodZmax;
+	float MouseMax;
 
 public:
 	// Called every frame
