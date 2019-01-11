@@ -359,7 +359,7 @@ void AFPSwanderfulCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 	//jumping
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFPSwanderfulCharacter::StartJump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AFPSwanderfulCharacter::StopJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this,&AFPSwanderfulCharacter::StopJump);
 
 	//interaction
 	//PlayerInputComponent->BindAction("InteractMain", IE_Pressed, this, &AFPSwanderfulCharacter::Interact);
@@ -409,11 +409,13 @@ void AFPSwanderfulCharacter::MoveRight(float value)
 
 void AFPSwanderfulCharacter::StartJump()
 {
+	if(bCanMove)
 	bPressedJump = true;
 }
 
 void AFPSwanderfulCharacter::StopJump()
 {
+	if(bCanMove)
 	bPressedJump = false;
 }
 

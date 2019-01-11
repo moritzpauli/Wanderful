@@ -1,19 +1,35 @@
 static const int SceneTextureId = 14;
 float2 TexelSize = View.ViewSizeAndInvSize.zw;
 float2 UV = GetDefaultSceneTextureUV(Parameters, SceneTextureId);
-float4 PixelSum = float4(0, 0, 0,0);
+float3 PixelSum = float3(0, 0, 0);
 
 //return SceneTexture;
 
 for (int x = 0; x < Passes; x++)
 {
   
-	PixelSum = float4(SceneTexture);
-	/*PixelSum = float4(SceneTexture, UV + float2(-TexelSize.x, TexelSize.y)) + 
-	float4(SceneTexture, UV + float2(0, TexelSize.y)) + float4(SceneTexture, UV + float2(TexelSize.x, TexelSize.y)) +
-	float4(SceneTexture, UV + float2(-TexelSize.x, 0)) + float4(SceneTexture, UV + float2(0, 0)) + float4(SceneTexture, UV + float2(TexelSize.x, 0)) +
-	float4(SceneTexture, UV + float2(-TexelSize.x, -TexelSize.y)) + float4(SceneTexture, UV + float2(0, -TexelSize.y)) + 
-	float4(SceneTexture, UV + float2(TexelSize.x, -TexelSize.y));*/
+	//PixelSum = float4(SceneTexture);
+	float3 UpperRow = Texture2DSample(ScreenTexture, UV + float2(-TexelSize.x,TexelSize.y))
+ 				+ Texture2DSample(ScreenTexture, UV + float2(0,TexelSize.y))
+			 	+ Texture2DSample(ScreenTexture, UV + float2(TexelSize.x,TexelSize.y));
+
+	/*float4 CenterRow = float4()
+ 				+ float4()
+			 	+ float4();*/
+
+	/*float4 BottomRow = float4()
+ 				+ float4()
+			 	+ float4();*/
+
+
+	PixelSum = UpperRow;
+	//PixelSum = UpperRow + CenterRow + BottomRow;
+
+	/*PixelSum = float4(SceneTexture, UV + float2(-TexelSize.x, 	TexelSize.y)) + 
+	float4(SceneTexture, UV + float2(0, TexelSize.y)) + float4	(SceneTexture, UV + float2(TexelSize.x, TexelSize.y)) +
+	float4(SceneTexture, UV + float2(-TexelSize.x, 0)) + 	float4(SceneTexture, UV + float2(0, 0)) + float4	(SceneTexture, UV + float2(TexelSize.x, 0)) +
+	float4(SceneTexture, UV + float2(-TexelSize.x, -	TexelSize.y)) + float4(SceneTexture, UV + float2(0, -	TexelSize.y)) + 
+	float4(SceneTexture, UV + float2(TexelSize.x, -	TexelSize.y));*/
 
 }
 

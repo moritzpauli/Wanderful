@@ -43,6 +43,8 @@ protected:
 	bool bShutterClosed;
 	float shutterspeed;
 	float focusspeed;
+	float startfspeed;
+	float fspeedmod;
 	class UPostProcessComponent* PlayerPP;
 	FText test;
 

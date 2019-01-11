@@ -2,6 +2,7 @@
 
 #include "PumpTest.h"
 #include "Engine/World.h"
+#include "Engine.h"
 #include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
 #include "Components/StaticMeshComponent.h"
 
@@ -28,12 +29,13 @@ void APumpTest::BeginPlay()
 	PumpHandleComp->SetRelativeRotation(FRotator(0,0,0));
 	if(WaterfStream)
 	WaterfStream->Deactivate();
-
+	ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
 }
 
 void APumpTest::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 	PumpInteracting = GetBInteract();
 	if (PumpInteracting) {
 		PumpAction();
@@ -51,11 +53,13 @@ void APumpTest::PumpAction()
 	if (!bGetMouse) {
 		bGetMouse = true;
 		StartCount = FMath::RandRange(15, 25);
+		ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+		ViewportSize = FVector2D(ViewportSize.X - 2.0f, ViewportSize.Y - 2.0f);
 		Counter = 0;
 	}
 	GetWorld()->GetFirstPlayerController()->GetMousePosition(cMouseX,cMouseY);
-	PumpHandleComp->SetRelativeRotation(FRotator(0,0,cMouseY/(1026/(rotMin-rotMax))));
-	SteelRod->SetRelativeLocation(FVector(0, 0, cMouseY /(1026/(RodZmin-RodZmax))));
+	PumpHandleComp->SetRelativeRotation(FRotator(0,0,cMouseY/(ViewportSize.Y/(rotMin-rotMax))));
+	SteelRod->SetRelativeLocation(FVector(0, 0, cMouseY /(ViewportSize.Y/(RodZmin-RodZmax))));
 	//UE_LOG(LogTemp, Warning, TEXT("%f"), PumpHandleComp->RelativeRotation.Roll);
 	UE_LOG(LogTemp, Warning, TEXT("%f"), cMouseY);
 	if (PumpHandleComp->RelativeRotation.Roll >= rotMin) {

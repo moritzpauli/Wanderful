@@ -55,6 +55,8 @@ protected:
 	float RodZmin;
 	float RodZmax;
 	float MouseMax;
+	FVector2D ViewportSize;
+	
 
 public:
 	// Called every frame

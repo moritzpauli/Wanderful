@@ -27,7 +27,8 @@ APhotoCamera::APhotoCamera()
 	bShotTaken = false;
 	bShutterClosed = false;
 	shutterspeed = 0.2f;
-	focusspeed = 0.08f;
+	startfspeed = 0.3f;
+	fspeedmod = 1.3061f;
 	bInFocus = false;
 }
 
@@ -63,6 +64,7 @@ void APhotoCamera::BeginPlay()
 
 	if (&Cast<UTextWidget>(CameraOverlay)->DisplayText != nullptr)
 		Cast<UTextWidget>(CameraOverlay)->DisplayText = FText::FromString(FString::FromInt(filmstock));
+	focusspeed = startfspeed;
 }
 
 // Called every frame
@@ -71,18 +73,26 @@ void APhotoCamera::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (bFocusBlur) {
 		if (!bInFocus) {
+			//PlayerPP->Settings.DepthOfFieldFocalDistance -= focusspeed;
+			focusspeed = focusspeed / fspeedmod;
 			PlayerPP->BlendWeight += focusspeed;
 		}
-		if (PlayerPP->BlendWeight >= 1.0f) {
+		if (/*PlayerPP->Settings.DepthOfFieldFocalDistance <= 6.0f*/ PlayerPP->BlendWeight >= 0.98f ) {
 			bInFocus = true;
+			//focusspeed = startfspeed;
 		}
 		if (bInFocus) {
+			//PlayerPP->Settings.DepthOfFieldFocalDistance += focusspeed;
+			focusspeed = focusspeed * fspeedmod;
 			PlayerPP->BlendWeight -= focusspeed;
-			if (PlayerPP->BlendWeight == 0) {
+
+			if (PlayerPP->BlendWeight<=0.0f) {
 				UE_LOG(LogTemp, Warning, TEXT("back in FF"));
 				bInFocus = false;
 				bFocusBlur = false;
 				bFocusComplete = true;
+				focusspeed = startfspeed;
+				PlayerPP->BlendWeight = 0.0f;
 				Exposure();
 			}
 		}
