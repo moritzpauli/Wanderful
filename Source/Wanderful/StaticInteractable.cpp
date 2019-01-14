@@ -32,6 +32,7 @@ void AStaticInteractable::BeginPlay()
 	Super::BeginPlay();
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFPSwanderfulCharacter::StaticClass(), MyPlayers);
 	MyPlayer = Cast<AFPSwanderfulCharacter>(MyPlayers[0]);
+	OgRaycastLength = MyPlayer->RayCastLength;
 	
 }
 
@@ -68,7 +69,7 @@ void AStaticInteractable::OnInteract()
 	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bCanMove = false;
 	if(bLockView)
 	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bFreeView = false;
-	
+	MyPlayer->RayCastLength = RaycastLenghtEngaged;
 }
 
 void AStaticInteractable::OnInteractEnd() {
@@ -78,8 +79,10 @@ void AStaticInteractable::OnInteractEnd() {
 	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bCanMove = true;
 	if(bLockView)
 	Cast<AFPSwanderfulCharacter>(MyPlayers[0])->bFreeView = true;
+	MyPlayer->RayCastLength = OgRaycastLength;
 	bInteractEndReadyOne = false;
 	bInteractEndReadyTwo = false;
+	
 }
 
 

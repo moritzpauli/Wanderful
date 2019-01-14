@@ -18,10 +18,21 @@ public:
 	AFishingSpot();
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* Fishtank;
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* Float;
+	bool bTankInView;
+	UPROPERTY(EditAnywhere)
+	FVector FloatPosition;
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* FishtankPlane;
+	UPROPERTY(EditAnywhere)
+	class USceneComponent* WireConnector;
+
 
 
 protected:
-
+	bool SetHeight;
+	FTransform PlaneTransform;
 
 public:
 	virtual void Tick(float DeltaTime) override;
