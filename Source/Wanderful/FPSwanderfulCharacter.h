@@ -34,8 +34,6 @@ public:
 	class UPostProcessComponent* FocusBlur;
 	UPROPERTY(EditAnywhere)
 	bool bPuzzlePu;
-	//UPROPERTY(EditAnywhere)
-	//FPostProcessSettings InspectBlurSettings;
 	UPROPERTY(EditAnywhere)
 	bool bFire;
 	bool InteractPressed;
@@ -44,6 +42,7 @@ public:
 	bool bPhotoCamera;
 	UPROPERTY(EditAnywhere)
 	AActor* CurrentInView;
+	float RayCastLength;
 
 protected:
 	// Called when the game starts or when spawned
@@ -75,10 +74,15 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override { TagContainer = GameplayTags; return; }
 
+
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* HoldingComponent;
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* StickHoldingComponent;
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* FishingRod;
+	UPROPERTY(EditAnywhere)
+	class UCableComponent* FishingWire;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UCameraShake> MyShake;
 	UPROPERTY(EditAnywhere)

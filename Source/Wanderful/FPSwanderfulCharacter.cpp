@@ -8,6 +8,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "FilmRoll.h"
 #include "PuzzleItemSpot.h"
+#include "FishingSpot.h"
+#include "CableComponent.h"
+
+
+
+
 
 
 
@@ -22,6 +28,10 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	HoldingComponent = CreateDefaultSubobject<USceneComponent>("HoldingComponent");
 	StickHoldingComponent = CreateDefaultSubobject<USceneComponent>("StickHoldingComponent");
+	FishingRod = CreateDefaultSubobject<UStaticMeshComponent>("FishingRod");
+	FishingRod->SetupAttachment(Camera);
+	FishingWire = CreateDefaultSubobject<UCableComponent>("MyFishingWire");
+	FishingWire->SetupAttachment(FishingRod);
 	HoldingComponent->SetRelativeLocation(HoldingPosition);
 	HoldingComponent->SetupAttachment(Camera);
 	StickHoldingComponent->SetRelativeTransform(StickHoldingTransform);
@@ -40,6 +50,8 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	bFreeView = true;
 	bPhotoCamera = false;
 	bFilmRoll = false;
+	RayCastLength = 500.0f;
+	FishingRod->SetActive(false);
 }
 
 // Called when the game starts or when spawned
@@ -124,6 +136,32 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 				bFilmRoll = false;
 			}
 
+			FString compName = hit.GetComponent()->GetName();
+			//UE_LOG(LogTemp, Warning, TEXT("%s"), *compName);
+			//Fish Tank in View
+			if (hit.GetComponent()->GetName()==TEXT("MyFishtankPlane")) {
+				
+				CurrentInView = hit.GetActor();
+				Cast<AFishingSpot>(CurrentInView)->bTankInView = true;
+				Cast<AFishingSpot>(CurrentInView)->FloatPosition = hit.ImpactPoint;
+				
+
+				//need to get AActor* as FComponentReference
+
+				FishingWire->SetAttachEndTo(CurrentInView,TEXT("WireConnector"),TEXT(""));
+				//FishingWire->AttachEndToSocketName(TEXT("WireConnector"));
+			}
+			else {
+				if (CurrentInView) {
+					if (hit.GetComponent()->GetName() == TEXT("MyFishtankPlane")) {
+						Cast<AFishingSpot>(CurrentInView)->bTankInView = false;
+					}
+				}
+			}
+
+
+
+			//Static Interactable in View
 			if (hit.GetActor()->GetClass()->IsChildOf(AStaticInteractable::StaticClass())) {
 				CurrentInView = hit.GetActor();
 				Cast<AStaticInteractable>(CurrentInView)->bInView = true;
@@ -163,7 +201,11 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 				if (CurrentInView->GetClass()->IsChildOf(AStaticInteractable::StaticClass())) {
 					Cast<AStaticInteractable>(CurrentInView)->bInView = false;
 				}
+				if (CurrentInView->GetClass()->IsChildOf(AFishingSpot::StaticClass())) {
+					Cast<AFishingSpot>(CurrentInView)->bTankInView = false;
+				}
 			}
+			
 		}
 
 	}
@@ -236,7 +278,7 @@ bool AFPSwanderfulCharacter::CastRay(FHitResult  &HitResult)
 	//Direction
 	FVector ForwardVector = Camera->GetForwardVector();
 	//length
-	FVector EndTrace = ((ForwardVector*500.f) + StartTrace);
+	FVector EndTrace = ((ForwardVector*RayCastLength) + StartTrace);
 	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
 	//DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green, true);
 	return GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams);

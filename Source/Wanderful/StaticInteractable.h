@@ -31,6 +31,8 @@ public:
 	bool bLockMovement;
 	TArray<AActor*> MyPlayers;
 	class AFPSwanderfulCharacter* MyPlayer;
+	UPROPERTY(EditAnywhere)
+	float RaycastLenghtEngaged;
 	
 
 protected:
@@ -39,6 +41,7 @@ protected:
 	bool bInteractEndReadyOne;
 	bool bInteractEndReadyTwo;
 	bool bInteractPressed;
+	float OgRaycastLength;
 
 public:	
 	// Called every frame
