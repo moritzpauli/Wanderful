@@ -48,13 +48,13 @@ void AViewBench::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (lerpin) {
-		MyPlayer->SetActorLocation(FMath::Lerp(MyPlayer->GetActorLocation(),PlayerPos->GetComponentLocation(), 0.03f));
-		MyPlayer->GetController()->SetControlRotation(FMath::Lerp(MyPlayer->GetActorRotation(), PlayerPos->GetComponentRotation(), 0.04f));
+		MyPlayer->SetActorLocation(FMath::Lerp(MyPlayer->GetActorLocation(),PlayerPos->GetComponentLocation(), 2.6f*DeltaTime));
+		MyPlayer->GetController()->SetControlRotation(FMath::Lerp(MyPlayer->GetActorRotation(), PlayerPos->GetComponentRotation(), 3.6f*DeltaTime));
 	}
 
 	if (lerpout) {
-		MyPlayer->SetActorLocation(FMath::Lerp(MyPlayer->GetActorLocation(),PlayerOGPosition, 0.06f));
-		MyPlayer->GetController()->SetControlRotation(FMath::Lerp(MyPlayer->GetActorRotation(), PlayerOGRotation, 0.08f));
+		MyPlayer->SetActorLocation(FMath::Lerp(MyPlayer->GetActorLocation(),PlayerOGPosition, 5.0f*DeltaTime));
+		MyPlayer->GetController()->SetControlRotation(FMath::Lerp(MyPlayer->GetActorRotation(), PlayerOGRotation, 8.0f*DeltaTime));
 		if (FIntVector((FMath::RoundToInt(MyPlayer->GetActorLocation().X)), (FMath::RoundToInt(MyPlayer->GetActorLocation().Y)),  (FMath::RoundToInt(MyPlayer->GetActorLocation().Z)   )) == 
 			FIntVector((FMath::RoundToInt(PlayerOGPosition.X)), (FMath::RoundToInt(PlayerOGPosition.Y)), (FMath::RoundToInt(PlayerOGPosition.Z)))
 			&& FIntVector((FMath::RoundToInt(MyPlayer->GetActorRotation().Pitch)), (FMath::RoundToInt(MyPlayer->GetActorRotation().Yaw)), (FMath::RoundToInt(MyPlayer->GetActorRotation().Roll))) == 

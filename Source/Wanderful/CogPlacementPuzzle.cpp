@@ -24,11 +24,11 @@ void ACogPlacementPuzzle::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (GetSolvedStatus()) {
 		UE_LOG(LogTemp, Warning, TEXT("cogpuzzle solved"));
-		cog1->AddLocalRotation(AddedRotation,false,0,ETeleportType::None);
-		cog2->AddLocalRotation(AddedRotation, false, 0, ETeleportType::None);
-		cog3->AddLocalRotation(AddedRotation, false, 0, ETeleportType::None);
+		cog1->AddLocalRotation(AddedRotation*DeltaTime,false,0,ETeleportType::None);
+		cog2->AddLocalRotation(AddedRotation*DeltaTime, false, 0, ETeleportType::None);
+		cog3->AddLocalRotation(AddedRotation*DeltaTime, false, 0, ETeleportType::None);
 		for (int i = 0; i < PuzzleSpots.Num(); i++) {
-			PuzzleSpots[i]->AddActorLocalRotation(AddedRotation, false, 0, ETeleportType::None);
+			PuzzleSpots[i]->AddActorLocalRotation(AddedRotation*DeltaTime, false, 0, ETeleportType::None);
 		}
 	}
 }

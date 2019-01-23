@@ -20,6 +20,10 @@ public:
 private:
 	/** Crosshair asset pointer */
 	class UTexture2D* CrosshairTex;
+	FVector2D OGSize;
+	bool bGetPlayer;
+	TArray<AActor*> MyPlayers;
+	class AFPSwanderfulCharacter* MyPlayer;
 
 };
 

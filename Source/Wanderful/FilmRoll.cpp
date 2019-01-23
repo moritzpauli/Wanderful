@@ -22,6 +22,8 @@ void AFilmRoll::BeginPlay()
 	Super::BeginPlay();
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APhotoCamera::StaticClass(), MyCams);
 	MyPCam = Cast<APhotoCamera>(MyCams[0]);
+	//AFilmRoll* secondroll = DuplicateObject(this,this->GetOuter(),TEXT("testroll"));
+	//secondroll->AddActorWorldOffset(FVector(1,0,0));
 }
 
 // Called every frame
