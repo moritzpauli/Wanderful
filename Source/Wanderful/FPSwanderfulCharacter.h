@@ -33,6 +33,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UPostProcessComponent* FocusBlur;
 	UPROPERTY(EditAnywhere)
+	class UPhysicsConstraintComponent* RodTip;
+	UPROPERTY(EditAnywhere)
+	TArray<class AFish*> MyCatches;
+	UPROPERTY(EditAnywhere)
 	bool bPuzzlePu;
 	UPROPERTY(EditAnywhere)
 	bool bFire;
@@ -52,6 +56,8 @@ protected:
 	void OnInspect();
 	void OnInspectReleased();
 	void OnFiring();
+	void OnWheelUp();
+	void OnWheelDown();
 	
 	
 
@@ -130,6 +136,8 @@ public:
 
 	void ToggleMovement();
 	void ToggleItemPU();
+	void FishingRodOn();
+	void FishingRodOff();
 	void InteractEnd() { InteractPressed = false; };
 	bool GetInteractPressed() { return InteractPressed; };
 	
