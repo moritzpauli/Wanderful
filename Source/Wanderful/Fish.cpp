@@ -3,6 +3,7 @@
 #include "Fish.h"
 #include "Components/StaticMeshComponent.h"
 #include "FishingSpot.h"
+#include "CableComponent.h"
 
 
 // Sets default values
@@ -11,7 +12,7 @@ AFish::AFish()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	RootMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RootMesh"));
-	MouthSpot = CreateDefaultSubobject<USceneComponent>(TEXT("Mouthspot"));
+	MouthSpot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mouthspot"));
 	RootMesh->OnComponentEndOverlap.AddDynamic(this, &AFish::OnOverlapEnd);
 	bIdle = false;
 	bCheckSloth = false;
@@ -84,8 +85,10 @@ void AFish::OnOverlapEnd(UPrimitiveComponent * OverlappedComp, AActor * OtherAct
 		}
 		if (OtherComp->GetName() == TEXT("RespawnTank")) {
 			//UE_LOG(LogTemp, Warning, TEXT("RespawnFish"));
-			Cast<AFishingSpot>(OtherActor)->SpawnFish(Fishdex);
+			
 			if (bDestroyable) {
+				Cast<AFishingSpot>(OtherActor)->SpawnFish(Fishdex);
+				//UE_LOG(LogTemp, Warning, TEXT("Fish destroyed"));
 				Destroy(this);
 			}
 		}

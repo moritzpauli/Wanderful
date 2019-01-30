@@ -35,6 +35,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UPhysicsConstraintComponent* RodTip;
 	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* LineStartComponent;
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* HoldCamera;
+	UPROPERTY(EditAnywhere)
 	TArray<class AFish*> MyCatches;
 	UPROPERTY(EditAnywhere)
 	bool bPuzzlePu;
@@ -46,7 +50,10 @@ public:
 	bool bPhotoCamera;
 	UPROPERTY(EditAnywhere)
 	AActor* CurrentInView;
+	UPROPERTY(EditAnywhere)
+	AActor* FishingTestActor;
 	float RayCastLength;
+	bool bCameraInHand;
 
 protected:
 	// Called when the game starts or when spawned
@@ -58,7 +65,8 @@ protected:
 	void OnFiring();
 	void OnWheelUp();
 	void OnWheelDown();
-	
+	void OnFishingTest();
+	void OnTakeCamera();
 	
 
 
@@ -69,6 +77,9 @@ protected:
 	bool bBobStrafe;
 	bool bBobStraight;
 	FHitResult hit;
+	bool bFishingTest;
+	FRotator ControlRotation;
+	FVector CameraHoldingPosition;
 	
 
 
