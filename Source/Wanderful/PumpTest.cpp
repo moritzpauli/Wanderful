@@ -64,12 +64,9 @@ void APumpTest::PumpAction()
 	UE_LOG(LogTemp, Warning, TEXT("%f"), cMouseY);
 	if (PumpHandleComp->RelativeRotation.Roll >= rotMin) {
 		bHitEnd = true;
-		//UE_LOG(LogTemp, Warning, TEXT("end"));
-
 	}
 	if (PumpHandleComp->RelativeRotation.Roll <= rotMax) {
 		bHitStart = true;
-		//UE_LOG(LogTemp, Warning, TEXT("start"));
 		
 	}
 	if (bHitStart && bHitEnd) {
@@ -79,7 +76,7 @@ void APumpTest::PumpAction()
 		//UE_LOG(LogTemp, Warning, TEXT("%d"), Counter);
 	}
 	if (Counter >= StartCount) {
-		//UE_LOG(LogTemp, Warning, TEXT("Wasser arsch"));
+		UE_LOG(LogTemp, Warning, TEXT("Wasser arsch"));
 		if(WaterfStream)
 		WaterfStream->Activate();
 	}

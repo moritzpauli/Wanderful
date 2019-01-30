@@ -17,7 +17,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* RootMesh;
 	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* MouthSpot;
+	class USceneComponent* MouthSpot;
 	UPROPERTY(EditAnywhere)
 	FString Rarity;
 	UPROPERTY(EditAnywhere)

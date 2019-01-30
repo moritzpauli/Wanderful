@@ -28,7 +28,7 @@ APhotoCamera::APhotoCamera()
 	bShutterClosed = false;
 	shutterspeed = 0.2f;
 	startfspeed = 0.3f;
-	fspeedmod = 1.3015f;
+	fspeedmod = 1.3061f;
 	bInFocus = false;
 }
 
@@ -54,7 +54,7 @@ void APhotoCamera::BeginPlay()
 	PlayerCam = MyPlayer->Camera;
 	PlayerPP = MyPlayer->FocusBlur;
 	PlayerPP->BlendWeight = 0.0f;
-
+	
 	OgPostProcessing = PlayerCam->PostProcessSettings;
 	SaveGameInstance = Cast<UGameSaves>(UGameplayStatics::CreateSaveGameObject(UGameSaves::StaticClass()));
 	if (UGameplayStatics::DoesSaveGameExist(TEXT("MySlot"), 0)) {
@@ -77,7 +77,7 @@ void APhotoCamera::Tick(float DeltaTime)
 			focusspeed = focusspeed / fspeedmod;
 			PlayerPP->BlendWeight += focusspeed;
 		}
-		if (/*PlayerPP->Settings.DepthOfFieldFocalDistance <= 6.0f*/ PlayerPP->BlendWeight >= 0.995f) {
+		if (/*PlayerPP->Settings.DepthOfFieldFocalDistance <= 6.0f*/ PlayerPP->BlendWeight >= 0.98f ) {
 			bInFocus = true;
 			//focusspeed = startfspeed;
 		}
@@ -86,7 +86,7 @@ void APhotoCamera::Tick(float DeltaTime)
 			focusspeed = focusspeed * fspeedmod;
 			PlayerPP->BlendWeight -= focusspeed;
 
-			if (PlayerPP->BlendWeight <= 0.0f) {
+			if (PlayerPP->BlendWeight<=0.0f) {
 				UE_LOG(LogTemp, Warning, TEXT("back in FF"));
 				bInFocus = false;
 				bFocusBlur = false;
@@ -96,7 +96,7 @@ void APhotoCamera::Tick(float DeltaTime)
 				Exposure();
 			}
 		}
-
+		
 	}
 	if (bShotTaken) {
 		if (!bShutterClosed) {
@@ -114,7 +114,7 @@ void APhotoCamera::Tick(float DeltaTime)
 			}
 		}
 	}
-
+	
 }
 
 
@@ -122,7 +122,7 @@ void APhotoCamera::TakePhoto() {
 	if (bCameraMode && filmstock > 0) {
 		bFocusBlur = true;
 		if (bFocusComplete) {
-
+		
 		}
 
 
@@ -158,22 +158,18 @@ void APhotoCamera::Exposure()
 
 void APhotoCamera::EnterCameraMode()
 {
-	if (MyPlayer->bCameraInHand) {
-		bCameraMode = !bCameraMode;
-		if (bCameraMode && MyPlayer->Inventory == NULL && MyPlayer->bCanMove == true) {
-			UE_LOG(LogTemp, Warning, TEXT("PhotoModeStart"));
-			PlayerCam->PostProcessSettings = PhotoPostProcessing;
-			MyPlayer->HoldCamera->SetHiddenInGame(true);
-			MyPlayer->bPhotoCamera = true;
-			CameraOverlay->AddToViewport();
+	bCameraMode = !bCameraMode;
+	if (bCameraMode && MyPlayer->Inventory == NULL && MyPlayer->bCanMove == true) {
+		UE_LOG(LogTemp, Warning, TEXT("PhotoModeStart"));
+		PlayerCam->PostProcessSettings = PhotoPostProcessing;
+		MyPlayer->bPhotoCamera = true;
+		CameraOverlay->AddToViewport();
 
-		}
-		if (!bCameraMode) {
-			PlayerCam->PostProcessSettings = OgPostProcessing;
-			MyPlayer->bPhotoCamera = false;
-			CameraOverlay->RemoveFromViewport();
-			MyPlayer->HoldCamera->SetHiddenInGame(false);
-		}
+	}
+	if (!bCameraMode) {
+		PlayerCam->PostProcessSettings = OgPostProcessing;
+		MyPlayer->bPhotoCamera = false;
+		CameraOverlay->RemoveFromViewport();
 	}
 }
 
@@ -194,7 +190,7 @@ void APhotoCamera::DeleteSave()
 void APhotoCamera::SetupPhotoInputComponent(UInputComponent* PhotoInputComponent)
 {
 
-	PhotoInputComponent->BindAction("Fire", IE_Pressed, this, &APhotoCamera::TakePhoto);
+	PhotoInputComponent->BindAction("Photo", IE_Pressed, this, &APhotoCamera::TakePhoto);
 	PhotoInputComponent->BindAction("CameraMode", IE_Pressed, this, &APhotoCamera::EnterCameraMode);
 	PhotoInputComponent->BindAction("CameraMode", IE_Released, this, &APhotoCamera::ExitCameraMode);
 	PhotoInputComponent->BindAction("DeleteSave", IE_Pressed, this, &APhotoCamera::DeleteSave);

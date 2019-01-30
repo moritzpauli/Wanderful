@@ -16,9 +16,6 @@ class WANDERFUL_API AFishingSpot : public AStaticInteractable
 
 public:
 	AFishingSpot();
-
-	UPROPERTY(EditAnywhere)
-	AActor* TestSphere;
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* Fishtank;
 	UPROPERTY(EditAnywhere)
@@ -62,8 +59,6 @@ public:
 	float ReelSpeed;
 	UPROPERTY(EditAnywhere)
 	float FloatWeight;
-	UPROPERTY(EditAnywhere)
-	bool CurrentFishDestroyable;
 	bool bHookCast;
 	bool bOnInteractStart;
 	bool bOnInteractEnd;

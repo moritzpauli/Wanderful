@@ -42,7 +42,7 @@ void AStaticInteractable::Tick(float DeltaTime)
 	
 	Super::Tick(DeltaTime);
 	bInteractPressed = MyPlayer->GetInteractPressed();
-	if (bInRange && bInView && !bInteracting && !MyPlayer->bCameraInHand) {
+	if (bInRange && bInView && !bInteracting) {
 		if (bInteractPressed) {
 			OnInteract();
 		}

@@ -11,7 +11,6 @@
 #include "FishingSpot.h"
 #include "CableComponent.h"
 #include "Runtime/Engine/Classes/PhysicsEngine/PhysicsConstraintComponent.h"
-#include "Fish.h"
 
 
 
@@ -28,21 +27,16 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	HoldingComponent = CreateDefaultSubobject<USceneComponent>("HoldingComponent");
-	HoldCamera = CreateDefaultSubobject<UStaticMeshComponent>("HoldCamera");
 	StickHoldingComponent = CreateDefaultSubobject<USceneComponent>("StickHoldingComponent");
 	FishingRod = CreateDefaultSubobject<UStaticMeshComponent>("FishingRod");
 	RodTip = CreateDefaultSubobject<UPhysicsConstraintComponent>("RodTip");
-	LineStartComponent = CreateDefaultSubobject<UStaticMeshComponent>("LineStartComponent");
-
 	FishingRod->SetupAttachment(Camera);
 	FishingWire = CreateDefaultSubobject<UCableComponent>("MyFishingWire");
 	FishingWire->SetupAttachment(FishingRod);
-	LineStartComponent->SetupAttachment(FishingRod);
 	RodTip->SetupAttachment(FishingRod);
 	FishingWire->SetupAttachment(FishingRod);
 	HoldingComponent->SetRelativeLocation(HoldingPosition);
 	HoldingComponent->SetupAttachment(Camera);
-	HoldCamera->SetupAttachment(Camera);
 	StickHoldingComponent->SetRelativeTransform(StickHoldingTransform);
 	StickHoldingComponent->SetupAttachment(Camera);
 	CurrentItem = NULL;
@@ -61,8 +55,6 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	bFilmRoll = false;
 	RayCastLength = 500.0f;
 	FishingRod->SetActive(false);
-	bCanMove = true;
-	CameraHoldingPosition = FVector(40, 15, -35);
 }
 
 // Called when the game starts or when spawned
@@ -83,10 +75,7 @@ void AFPSwanderfulCharacter::BeginPlay()
 	FishingWire->SetVisibility(false);
 	FishingRod->Deactivate();
 	FishingWire->Deactivate();
-	HoldCamera->SetHiddenInGame(true);
-	RodTip->ConstraintActor1 = this;
-	RodTip->ComponentName1.ComponentName = FName("LineStartComponent");
-	HoldCamera->SetRelativeLocation(CameraHoldingPosition);
+	
 
 
 }
@@ -100,7 +89,7 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 	/*if (Inventory) {
 		bPuzzlePu = Cast<APickUp>(Inventory)->puzzlepu;
 	}*/
-
+	
 	if (CastRay(hit)) {
 		if (hit.GetActor()->GetClass()->IsChildOf(APuzzleItemSpot::StaticClass())) {
 			if (Cast<APuzzleItemSpot>(hit.GetActor())->ClueItem == Inventory) {
@@ -133,7 +122,7 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 	{
 		if (!bHoldingPickUp) {
 			CurrentItem = NULL;
-
+			
 		}
 		if (CurrentInView) {
 			if (CurrentInView->GetClass()->IsChildOf(APuzzleItemSpot::StaticClass())) {
@@ -144,15 +133,6 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 
 
 	if (!bHoldingPickUp) {
-		if (CurrentInView) {
-			if (CurrentInView->GetClass()->IsChildOf(AFishingSpot::StaticClass())) {
-				if (Cast<AFishingSpot>(CurrentInView)->bInteracting &&Cast<AFishingSpot>(CurrentInView)->bCaught) {
-					FishingWire->SetAttachEndTo(Cast<AFishingSpot>(CurrentInView)->HookedFish, TEXT("Mouthspot"), TEXT(""));
-				}
-
-
-			}
-		}
 		if (CastRay(hit)) {
 
 
@@ -167,26 +147,25 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 			FString compName = hit.GetComponent()->GetName();
 			//UE_LOG(LogTemp, Warning, TEXT("%s"), *compName);
 			//Fish Tank in View
-			if (hit.GetComponent()->GetName() == TEXT("MyFishtankPlane")) {
-
-
+			if (hit.GetComponent()->GetName()==TEXT("MyFishtankPlane")) {
+				
+				
 				CurrentInView = hit.GetActor();
 				Cast<AFishingSpot>(CurrentInView)->bTankInView = true;
-
+				
 				if (!Cast<AFishingSpot>(CurrentInView)->bHookCast && !Cast<AFishingSpot>(CurrentInView)->bCaught) {
 					Cast<AFishingSpot>(CurrentInView)->FloatPosition = hit.ImpactPoint;
 				}
+				
+			
 
-
-				if (!Cast<AFishingSpot>(CurrentInView)->bCaught) {
-					FishingWire->SetAttachEndTo(CurrentInView, TEXT("WireConnector"), TEXT(""));
-				}
+				FishingWire->SetAttachEndTo(CurrentInView,TEXT("WireConnector"),TEXT(""));
 			}
 			else {
 				if (CurrentInView) {
 					if (hit.GetComponent()->GetName() == TEXT("MyFishtankPlane")) {
 						Cast<AFishingSpot>(CurrentInView)->bTankInView = false;
-
+						
 					}
 				}
 			}
@@ -235,15 +214,15 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 				}
 				if (CurrentInView->GetClass()->IsChildOf(AFishingSpot::StaticClass())) {
 					Cast<AFishingSpot>(CurrentInView)->bTankInView = false;
-
+					
 				}
 			}
-
+			
 		}
 
 	}
 
-
+	
 
 	if (bInspecting) {
 		if (bHoldingPickUp) {
@@ -258,15 +237,6 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 			if (CurrentItem) {
 				CurrentItem->bInspecting = true;
 			}
-		}
-		if (bCameraInHand) {
-			Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 90.0f, 6.0f*DeltaTime));
-			HoldCamera->SetRelativeLocation(FVector(100.0f,0.0f,0.0f));	
-			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = 179.9000000000002f;
-			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = -179.9000000000002f;
-			ControlRotation = GetWorld()->GetFirstPlayerController()->GetControlRotation();
-			HoldCamera->SetWorldRotation(FQuat(ControlRotation));
-			HoldCamera->SetRenderCustomDepth(true);
 		}
 		else {
 			if (!bPhotoCamera)
@@ -283,10 +253,6 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 		if (bHoldingPickUp) {
 			HoldingComponent->SetRelativeLocation(HoldingPosition);
 			StickHoldingComponent->SetRelativeTransform(StickHoldingTransform);
-		}
-		if (bCameraInHand) {
-			HoldCamera->SetRelativeLocation(CameraHoldingPosition);
-			HoldCamera->SetRelativeRotation(FRotator(0, 0, 0));
 		}
 	}
 
@@ -366,7 +332,7 @@ void AFPSwanderfulCharacter::Interact()
 void AFPSwanderfulCharacter::OnInspect()
 {
 
-	if (bHoldingPickUp || bCameraInHand) {
+	if (bHoldingPickUp) {
 		LastRotation = GetControlRotation();
 		ToggleMovement();
 		InspectBlur->bEnabled = true;
@@ -374,7 +340,6 @@ void AFPSwanderfulCharacter::OnInspect()
 	else {
 		bInspecting = true;
 	}
-	
 }
 
 
@@ -382,7 +347,7 @@ void AFPSwanderfulCharacter::OnInspectReleased()
 {
 
 
-	if (bInspecting && bHoldingPickUp || bInspecting && bCameraInHand) {
+	if (bInspecting && bHoldingPickUp) {
 		GetController()->SetControlRotation(LastRotation);
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = rotationMax;
 		GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMin = rotationMin;
@@ -430,51 +395,9 @@ void AFPSwanderfulCharacter::OnWheelDown()
 			if (Cast<AFishingSpot>(CurrentInView)->bInteracting) {
 				Cast<AFishingSpot>(CurrentInView)->ReceiveReelInput(-1);
 				if (Cast<AFishingSpot>(CurrentInView)->bCaught) {
-					LineStartComponent->AddWorldOffset(FVector(0, 0, 0.1f));
-
+					RodTip->AddWorldOffset(FVector(0,0,0.1f));
 				}
 			}
-		}
-	}
-	if (bFishingTest) {
-		LineStartComponent->AddWorldOffset(FVector(0, 0, 0.3f));
-	}
-}
-
-void AFPSwanderfulCharacter::OnFishingTest()
-{
-	/*UE_LOG(LogTemp, Warning, TEXT("enter fishtest"));
-	bFishingTest = !bFishingTest;
-	if (bFishingTest) {
-		FishingRodOn();
-		if (FishingTestActor) {
-			FishingWire->SetAttachEndTo(FishingTestActor, TEXT(""), TEXT(""));
-			//RodTip->ConstraintActor2 = FishingTestActor;
-			FString RootCompName = FishingTestActor->GetRootComponent()->GetName();
-			//RodTip->ComponentName2.ComponentName = FName(*RootCompName);
-		}
-
-	}
-	if (!bFishingTest) {
-		FishingRodOff();
-	}*/
-}
-
-void AFPSwanderfulCharacter::OnTakeCamera()
-{
-	if (!bPhotoCamera && !bInspecting) {
-		bCameraInHand = !bCameraInHand;
-		if (bCameraInHand) {
-			if (bHoldingPickUp) {
-				if (CurrentItem) {
-					CurrentItem->PickUpObject();
-					bHoldingPickUp = false;
-				}
-			}
-			HoldCamera->SetHiddenInGame(false);
-		}
-		if (!bCameraInHand) {
-			HoldCamera->SetHiddenInGame(true);
 		}
 	}
 }
@@ -489,7 +412,7 @@ void AFPSwanderfulCharacter::ToggleMovement()
 
 void AFPSwanderfulCharacter::ToggleItemPU()
 {
-	if (CurrentItem && !bCameraInHand) {
+	if (CurrentItem) {
 
 		bHoldingPickUp = !bHoldingPickUp;
 		CurrentItem->PickUpObject();
@@ -542,7 +465,7 @@ void AFPSwanderfulCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 	//jumping
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFPSwanderfulCharacter::StartJump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AFPSwanderfulCharacter::StopJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this,&AFPSwanderfulCharacter::StopJump);
 
 	//interaction
 	//PlayerInputComponent->BindAction("InteractMain", IE_Pressed, this, &AFPSwanderfulCharacter::Interact);
@@ -553,15 +476,9 @@ void AFPSwanderfulCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	PlayerInputComponent->BindAction("Inspect", IE_Released, this, &AFPSwanderfulCharacter::OnInspectReleased);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSwanderfulCharacter::OnFiring);
 	//mousewheel
-	PlayerInputComponent->BindAction("WheelUp", IE_Pressed, this, &AFPSwanderfulCharacter::OnWheelUp);
+	PlayerInputComponent->BindAction("WheelUp",IE_Pressed,this,&AFPSwanderfulCharacter::OnWheelUp);
 	PlayerInputComponent->BindAction("WheelDown", IE_Pressed, this, &AFPSwanderfulCharacter::OnWheelDown);
 
-
-	//enablefishingtest
-	PlayerInputComponent->BindAction("FishingTest", IE_Pressed, this, &AFPSwanderfulCharacter::OnFishingTest);
-
-	//takecamera
-	PlayerInputComponent->BindAction("PickCamera", IE_Pressed, this, &AFPSwanderfulCharacter::OnTakeCamera);
 
 }
 
@@ -602,14 +519,14 @@ void AFPSwanderfulCharacter::MoveRight(float value)
 
 void AFPSwanderfulCharacter::StartJump()
 {
-	if (bCanMove)
-		bPressedJump = true;
+	if(bCanMove)
+	bPressedJump = true;
 }
 
 void AFPSwanderfulCharacter::StopJump()
 {
-	if (bCanMove)
-		bPressedJump = false;
+	if(bCanMove)
+	bPressedJump = false;
 }
 
 
