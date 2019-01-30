@@ -22,7 +22,6 @@ void AViewBench::BeginPlay()
 
 void AViewBench::SitDown()
 {
-	MyPlayer->bFreeView = false;
 	if (MyPlayer->Inventory) {
 		MyPlayer->Inventory->SetActorHiddenInGame(true);
 	}
@@ -50,15 +49,48 @@ void AViewBench::Tick(float DeltaTime)
 	if (lerpin) {
 		MyPlayer->SetActorLocation(FMath::Lerp(MyPlayer->GetActorLocation(),PlayerPos->GetComponentLocation(), 2.6f*DeltaTime));
 		MyPlayer->GetController()->SetControlRotation(FMath::Lerp(MyPlayer->GetActorRotation(), PlayerPos->GetComponentRotation(), 3.6f*DeltaTime));
+		MyPlayer->bFreeView = false;
+		if (FIntVector((FMath::RoundToInt(MyPlayer->GetActorLocation().X)), (FMath::RoundToInt(MyPlayer->GetActorLocation().Y)), (FMath::RoundToInt(MyPlayer->GetActorLocation().Z))) ==
+			FIntVector((FMath::RoundToInt(PlayerPos->GetComponentLocation().X)), (FMath::RoundToInt(PlayerPos->GetComponentLocation().Y)), (FMath::RoundToInt(PlayerPos->GetComponentLocation().Z)))
+			&& FIntVector((FMath::RoundToInt(MyPlayer->GetActorRotation().Pitch)), (FMath::RoundToInt(MyPlayer->GetActorRotation().Yaw)), (FMath::RoundToInt(MyPlayer->GetActorRotation().Roll))) ==
+			FIntVector((FMath::RoundToInt(PlayerPos->GetComponentRotation().Pitch)), (FMath::RoundToInt(PlayerPos->GetComponentRotation().Yaw)), (FMath::RoundToInt(PlayerPos->GetComponentRotation().Roll)))) {
+			MyPlayer->bFreeView = true;
+			lerpin = false;
+		}
+	}
+
+
+	if (!lerpin && !lerpout && bSat) {
+		if (MyPlayer->GetActorRotation().Yaw > PlayerPos->GetComponentRotation().Yaw + LookMaxX) {
+			MyPlayer->GetController()->SetControlRotation(FRotator(MyPlayer->GetController()->GetControlRotation().Pitch, PlayerPos->GetComponentRotation().Yaw + LookMaxX, MyPlayer->GetController()->GetControlRotation().Roll));
+			//UE_LOG(LogTemp, Warning, TEXT("X"));
+			
+		}
+		if (MyPlayer->GetActorRotation().Yaw < PlayerPos->GetComponentRotation().Yaw - LookMaxX) {
+			MyPlayer->GetController()->SetControlRotation(FRotator(MyPlayer->GetController()->GetControlRotation().Pitch, PlayerPos->GetComponentRotation().Yaw - LookMaxX, MyPlayer->GetController()->GetControlRotation().Roll));
+			//UE_LOG(LogTemp, Warning, TEXT("Y"));
+		}
+		if (MyPlayer->GetController()->GetControlRotation().Pitch > PlayerPos->GetComponentRotation().Pitch + LookMaxY && MyPlayer->GetController()->GetControlRotation().Pitch < 180.0f) {
+			MyPlayer->GetController()->SetControlRotation(FRotator( PlayerPos->GetComponentRotation().Pitch + LookMaxY ,MyPlayer->GetController()->GetControlRotation().Yaw, MyPlayer->GetController()->GetControlRotation().Roll));
+			//FString lookangle = FString::SanitizeFloat(MyPlayer->GetController()->GetControlRotation().Pitch);
+			//UE_LOG(LogTemp, Warning, TEXT("X"));
+
+		}
+		if (MyPlayer->GetController()->GetControlRotation().Pitch < PlayerPos->GetComponentRotation().Pitch - LookMaxY+ 360.0f && MyPlayer->GetController()->GetControlRotation().Pitch>180.0f) {
+			MyPlayer->GetController()->SetControlRotation(FRotator(PlayerPos->GetComponentRotation().Pitch - LookMaxY, MyPlayer->GetController()->GetControlRotation().Yaw, MyPlayer->GetController()->GetControlRotation().Roll));
+			//UE_LOG(LogTemp, Warning, TEXT("X"));
+
+		}
 	}
 
 	if (lerpout) {
+		MyPlayer->bFreeView = false;
 		MyPlayer->SetActorLocation(FMath::Lerp(MyPlayer->GetActorLocation(),PlayerOGPosition, 5.0f*DeltaTime));
-		MyPlayer->GetController()->SetControlRotation(FMath::Lerp(MyPlayer->GetActorRotation(), PlayerOGRotation, 8.0f*DeltaTime));
+		//MyPlayer->GetController()->SetControlRotation(FMath::Lerp(MyPlayer->GetActorRotation(), PlayerOGRotation, 8.0f*DeltaTime));
 		if (FIntVector((FMath::RoundToInt(MyPlayer->GetActorLocation().X)), (FMath::RoundToInt(MyPlayer->GetActorLocation().Y)),  (FMath::RoundToInt(MyPlayer->GetActorLocation().Z)   )) == 
 			FIntVector((FMath::RoundToInt(PlayerOGPosition.X)), (FMath::RoundToInt(PlayerOGPosition.Y)), (FMath::RoundToInt(PlayerOGPosition.Z)))
-			&& FIntVector((FMath::RoundToInt(MyPlayer->GetActorRotation().Pitch)), (FMath::RoundToInt(MyPlayer->GetActorRotation().Yaw)), (FMath::RoundToInt(MyPlayer->GetActorRotation().Roll))) == 
-			FIntVector((FMath::RoundToInt(PlayerOGRotation.Pitch)), (FMath::RoundToInt(PlayerOGRotation.Yaw)), (FMath::RoundToInt(PlayerOGRotation.Roll)))) {
+			/*&& FIntVector((FMath::RoundToInt(MyPlayer->GetActorRotation().Pitch)), (FMath::RoundToInt(MyPlayer->GetActorRotation().Yaw)), (FMath::RoundToInt(MyPlayer->GetActorRotation().Roll))) == 
+			FIntVector((FMath::RoundToInt(PlayerOGRotation.Pitch)), (FMath::RoundToInt(PlayerOGRotation.Yaw)), (FMath::RoundToInt(PlayerOGRotation.Roll)))*/) {
 			
 			
 			

@@ -66,7 +66,9 @@ void AFishingSpot::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (GetBInteract()) {
-
+		if (HookedFish) {
+			CurrentFishDestroyable = HookedFish->bDestroyable;
+		}
 		if (!bSpawnFish) {
 			for (int i = 0; i < FishAmount; i++) {
 				SpawnFish(i);
@@ -147,14 +149,16 @@ void AFishingSpot::Tick(float DeltaTime)
 					if (lerpin) {
 						if (!bGetHookPos) {
 							OgHookPos = Float->GetComponentLocation();
+							HookedFish->AttachToComponent(Float, FAttachmentTransformRules::KeepWorldTransform);
 							bGetHookPos = true;
 						}
 						ReelSpeed = ReelSpeed - ReelSpeed / 3;
 						progress = progress + ReelSpeed * -1 * DeltaTime*40.0f;
 						Float->SetWorldLocation(FMath::Lerp(OgHookPos, FVector(MyPlayer->RodTip->GetComponentLocation().X, MyPlayer->RodTip->GetComponentLocation().Y,
 							Float->GetComponentLocation().Z), progress));
-						UE_LOG(LogTemp, Warning, TEXT("On the Hook"));
-						if (progress >= 1.0f) {
+						//UE_LOG(LogTemp, Warning, TEXT("On the Hook"));
+						HookedFish->bDestroyable = false;
+						if (progress >= 0.8f) {
 							if (!bCaught) {
 								FishCatch();
 							}
@@ -170,8 +174,9 @@ void AFishingSpot::Tick(float DeltaTime)
 
 	}
 	if (!GetBInteract()) {
-		MyPlayer->FishingRodOff();
+		
 		if (!bOnInteractEnd) {
+			MyPlayer->FishingRodOff();
 			myMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			FishtankPlane->SetVisibility(false);
 			Float->SetVisibility(false);
@@ -188,13 +193,14 @@ void AFishingSpot::Tick(float DeltaTime)
 			bFloatpull = true;
 			countstop = false;
 			bOnInteractStart = false;
-			bOnInteractEnd = true;
+			
 			/*PhysicsFloatToFish->ConstraintActor2 = NULL;
 			PhysicsFloatToFish->ComponentName2.ComponentName = FName("");*/
 			bCaught = false;
 			lerpin = true;
 			progress = 0.0f;
 			bGetHookPos = false;
+			bOnInteractEnd = true;
 		}
 
 	}
@@ -229,6 +235,7 @@ void AFishingSpot::FishFree()
 {
 	UE_LOG(LogTemp, Warning, TEXT("The Fish freed itself"));
 
+	HookedFish->bDestroyable = true;
 	HookedFish->bMove = true;
 	bStruggle = true;
 	bFloatpull = true;
@@ -241,23 +248,30 @@ void AFishingSpot::FishFree()
 
 void AFishingSpot::FishCatch()
 {
-
 	lerpin = false;
+	HookedFish->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	HookedFish->RootMesh->SetSimulatePhysics(true);
+	HookedFish->AddActorWorldOffset(FVector(0,0,10));
 	Float->SetVisibility(false);
 	//FloatToFish->SetHiddenInGame(false);
 	//FloatToFish->SetAttachEndTo(HookedFish, TEXT("Mouthspot"), TEXT(""));
 	//PhysicsFloatToFish->ConstraintActor2 = HookedFish;
 	//PhysicsFloatToFish->ComponentName2.ComponentName = FName("Mouthspot");
+
+	//test
+	//MyPlayer->RodTip->ConstraintActor2 = TestSphere;
+	
+
+	
 	MyPlayer->RodTip->ConstraintActor2 = HookedFish;
 	MyPlayer->RodTip->ComponentName2.ComponentName = FName("Mouthspot");
+	
 
-	HookedFish->bDestroyable = false;
+	
 	bStruggle = true;
 	bFloatpull = true;
 	strugglecounter = 0;
 	ReelSpeed = 0.0f;
-	HookedFish = nullptr;
 	bCaught = true;
 	bHooked = false;
 
