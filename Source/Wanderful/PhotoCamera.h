@@ -51,7 +51,6 @@ protected:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	void TakePhoto();
 	void Exposure();
 	void EnterCameraMode();
 	void ExitCameraMode();
@@ -62,6 +61,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void SetupPhotoInputComponent(UInputComponent* PhotoInputComponent);
 	void AddFilmRoll();
+	void TakePhoto();
 	
 	
 };

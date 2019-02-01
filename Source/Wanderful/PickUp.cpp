@@ -37,7 +37,8 @@ void APickUp::BeginPlay()
 	MyPlayer = Cast<AFPSwanderfulCharacter>(MyPlayers[0]);
 	mesh->MoveIgnoreActors.Add(MyPlayer);
 	mesh->IgnoreActorWhenMoving(MyPlayer,true);
-	mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel12, ECollisionResponse::ECR_Ignore);
+	//mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel12, ECollisionResponse::ECR_Ignore);
+	mesh->SetCollisionProfileName("PickUp");
 	PlayerCamera = MyPlayer->FindComponentByClass<UCameraComponent>();
 
 	TArray<USceneComponent*> Components;
@@ -129,5 +130,27 @@ void APickUp::PickUpObject()
 		mesh->AddForce(ForwardVector * 300 * mesh->GetMass());
 	}
 
+}
+
+void APickUp::PickUpObjectLight()
+{
+	pickedUP = !pickedUP;
+	gravity = !gravity;
+	mesh->SetEnableGravity(gravity);
+	mesh->SetSimulatePhysics(pickedUP ? false : true);
+	mesh->SetCollisionEnabled(pickedUP ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryAndPhysics);
+}
+
+void APickUp::ThrowObjectLight()
+{
+
+	if (!pickedUP && throwable) {
+		ForwardVector = PlayerCamera->GetForwardVector();
+		mesh->AddForce(ForwardVector * 24000 * mesh->GetMass());
+	}
+	if (!pickedUP && !throwable) {
+		ForwardVector = PlayerCamera->GetForwardVector();
+		mesh->AddForce(ForwardVector * 300 * mesh->GetMass());
+	}
 }
 

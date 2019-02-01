@@ -12,6 +12,8 @@
 AFishingSpot::AFishingSpot() {
 	Fishtank = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MyFishtank"));
 	Float = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MyFloat"));
+	FloatUpper = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FloatUpper"));
+	FloatLower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FloatLower"));
 	FishtankPlane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MyFishtankPlane"));
 	WireConnector = CreateDefaultSubobject<USceneComponent>(TEXT("WireConnector"));
 	RespawnTank = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RespawnTank"));
@@ -23,6 +25,8 @@ AFishingSpot::AFishingSpot() {
 	//FloatToFish->SetupAttachment(PhysicsFloatToFish);
 	WireConnector->SetupAttachment(Float);
 	HookTrigger->SetupAttachment(Float);
+	FloatLower->SetupAttachment(Float);
+	FloatUpper->SetupAttachment(Float);
 	HookTrigger->OnComponentBeginOverlap.AddDynamic(this, &AFishingSpot::OnHookOverlapBegin);
 
 	bHookCast = false;
@@ -35,6 +39,8 @@ AFishingSpot::AFishingSpot() {
 	bCaught = false;
 	lerpin = true;
 	bGetHookPos = false;
+	bobcount = 0;
+	
 
 }
 
@@ -42,9 +48,11 @@ AFishingSpot::AFishingSpot() {
 void AFishingSpot::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//UE_LOG(LogTemp, Warning, TEXT("just set that shit please"));
 	FishtankPlane->SetWorldTransform(Fishtank->GetComponentTransform());
 	FishtankPlane->SetWorldScale3D(FVector(FishtankPlane->GetComponentScale().X, FishtankPlane->GetComponentScale().Y, 0.01f));
-	FishtankPlane->AddLocalOffset(FVector(0.0f, 0.0f, (Fishtank->CalcBounds(PlaneTransform).BoxExtent.Z))*Fishtank->RelativeScale3D.Z);
+	FishtankPlane->AddLocalOffset(FVector(0.0f, 0.0f, (Fishtank->CalcBounds(PlaneTransform).BoxExtent.Z)) / 2);
 	FishtankPlane->SetVisibility(false);
 	RespawnTank->SetWorldTransform(Fishtank->GetComponentTransform());
 	RespawnTank->SetWorldScale3D(FVector(RespawnTank->GetComponentScale().X*1.7f, RespawnTank->GetComponentScale().Y*1.7f, RespawnTank->GetComponentScale().Z));
@@ -52,9 +60,12 @@ void AFishingSpot::BeginPlay()
 	SpawnedFish.SetNum(FishAmount);
 	RespawnTank->SetCollisionProfileName("ObjectOverlap");
 	RespawnTank->SetVisibility(false);
+	Fishtank->SetVisibility(false);
 	HookTrigger->SetCollisionProfileName("Trigger");
 	//FloatToFish->SetHiddenInGame(true);
-	FloatStartPosition = Float->GetComponentLocation();
+	Float->SetVisibility(false);
+	FloatLower->SetVisibility(false);
+	FloatUpper->SetVisibility(false);
 
 }
 
@@ -66,120 +77,128 @@ void AFishingSpot::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (GetBInteract()) {
-		if (HookedFish) {
-			CurrentFishDestroyable = HookedFish->bDestroyable;
-		}
-		if (!bSpawnFish) {
-			for (int i = 0; i < FishAmount; i++) {
-				SpawnFish(i);
+		if (!bCaught) {
+			if (HookedFish) {
+				CurrentFishDestroyable = HookedFish->bDestroyable;
 			}
-			bSpawnFish = true;
-		}
-		if (!bOnInteractStart) {
-			myMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			FishtankPlane->SetVisibility(true);
-			Float->SetVisibility(true);
-			bOnInteractEnd = false;
-			bOnInteractStart = true;
-		}
-		MyPlayer->FishingRodOn();
-		if (bTankInView) {
-			Float->SetWorldLocation(FloatPosition);
-		}
-		if (bHookCast) {
-			if (!bHooked) {
-				FVector NewLocation = Float->GetComponentLocation();
-				float DeltaHeight = (FMath::Sin((RunningTime - DeltaTime)*1.0f) - FMath::Sin(RunningTime*1.0f));
-				NewLocation.Z += DeltaHeight * 6.0f;
-				RunningTime += DeltaTime;
-				FloatPosition = NewLocation;
+			if (!bSpawnFish) {
+				for (int i = 0; i < FishAmount; i++) {
+					SpawnFish(i);
+				}
+				bSpawnFish = true;
 			}
-		}
-		if (bHooked) {
-			//bit bob
-			OgFloatPos = Float->GetComponentLocation();
-			if (bFloatpull) {
-				FVector NewLocation = Float->GetComponentLocation();
-				float DeltaHeight = (FMath::Sin((PullTime - DeltaTime)*5.0f) - FMath::Sin(PullTime*5.0f));
-				if (!countstop && DeltaHeight >= 0) {
-					bobcount++;
-					countstop = true;
-				}
-				if (countstop && DeltaHeight < 0) {
-					countstop = false;
-				}
-				NewLocation.Z += DeltaHeight * 10.0f;
-				PullTime += DeltaTime;
-				FloatPosition = NewLocation;
-				if (bobcount > 0) {
-					if (FloatPosition.Z < OgFloatPos.Z) {
-						PullTime = 0.0f;
-						bFloatpull = false;
-
-					}
-				}
+			if (!bOnInteractStart) {
+				myMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				FishtankPlane->SetVisibility(true);
+				Float->SetVisibility(true);
+				FloatLower->SetVisibility(true);
+				FloatUpper->SetVisibility(true);
+				bOnInteractEnd = false;
+				bOnInteractStart = true;
 			}
-			if (!bFloatpull) {
-				if (strugglecounter <= HookedFish->Toughness) {
-					struggletimer -= DeltaTime;
-					if (bStruggle) {
-						Balance -= HookedFish->Strength*DeltaTime;
-					}
-					Balance += ReelSpeed;
-					float DeltaHeight = (FMath::Sin((RunningTime - DeltaTime)*1.0f) - FMath::Sin(RunningTime*1.0f))*6.0f;
+			MyPlayer->FishingRodOn();
+			MyPlayer->bFishInspect = false;
+			if (bTankInView) {
+				Float->SetWorldLocation(FloatPosition);
+			}
+			if (bHookCast) {
+				if (!bHooked) {
+					FVector NewLocation = Float->GetComponentLocation();
+					float DeltaHeight = (FMath::Sin((RunningTime - DeltaTime)*1.0f) - FMath::Sin(RunningTime*1.0f));
+					NewLocation.Z += DeltaHeight * 6.0f;
 					RunningTime += DeltaTime;
-					float FloatPosZ = Float->GetComponentLocation().Z + DeltaHeight + (Balance*FloatWeight);
-					Float->SetWorldLocation(FVector(Float->GetComponentLocation().X, Float->GetComponentLocation().Y, FloatPosZ));
+					FloatPosition = NewLocation;
+				}
+			}
+			if (bHooked) {
+				//bit bob
+				OgFloatPos = Float->GetComponentLocation();
+				if (bFloatpull) {
+					//bFloatpull = false;
+					FVector NewLocation = Float->GetComponentLocation();
+					float DeltaHeight = (FMath::Sin((PullTime - DeltaTime)*5.0f) - FMath::Sin(PullTime*5.0f));
+					if (!countstop && DeltaHeight >= 0) {
+						bobcount++;
+						countstop = true;
+					}
+					if (countstop && DeltaHeight < 0) {
+						countstop = false;
+					}
+					NewLocation.Z += DeltaHeight * 8.0f;
+					PullTime += DeltaTime;
+					FloatPosition = NewLocation;
+					if (bobcount > 0) {
+						if (FloatPosition.Z < OgFloatPos.Z) {
+							PullTime = 0.0f;
+							bFloatpull = false;
 
-					if (struggletimer <= 0) {
-						bStruggle = !bStruggle;
-						strugglecounter++;
-						FString toprint = TEXT("the fish got weaker");
-						toprint.AppendInt(strugglecounter);
-						UE_LOG(LogTemp, Warning, TEXT("%s"), *toprint);
-						if (FMath::RandRange(0.0f, 1.0f) <= 0.3f) {
-							HookedFish->Strength += HookedFish->Strength / 16;
 						}
-						struggletimer = FMath::RandRange(StruggleTimeMin, StruggleTimeMax);
 					}
 				}
-
-
-				if (strugglecounter > HookedFish->Toughness) {
-					if (lerpin) {
-						if (!bGetHookPos) {
-							OgHookPos = Float->GetComponentLocation();
-							HookedFish->AttachToComponent(Float, FAttachmentTransformRules::KeepWorldTransform);
-							bGetHookPos = true;
+				if (!bFloatpull) {
+					if (strugglecounter <= HookedFish->Toughness) {
+						struggletimer -= DeltaTime;
+						if (bStruggle) {
+							Balance -= HookedFish->Strength*DeltaTime;
 						}
-						ReelSpeed = ReelSpeed - ReelSpeed / 3;
-						progress = progress + ReelSpeed * -1 * DeltaTime*40.0f;
-						Float->SetWorldLocation(FMath::Lerp(OgHookPos, FVector(MyPlayer->RodTip->GetComponentLocation().X, MyPlayer->RodTip->GetComponentLocation().Y,
-							Float->GetComponentLocation().Z), progress));
-						//UE_LOG(LogTemp, Warning, TEXT("On the Hook"));
-						HookedFish->bDestroyable = false;
-						if (progress >= 0.8f) {
-							if (!bCaught) {
-								FishCatch();
+						Balance += ReelSpeed;
+						float DeltaHeight = (FMath::Sin((RunningTime - DeltaTime)*1.0f) - FMath::Sin(RunningTime*1.0f))*6.0f;
+						RunningTime += DeltaTime;
+						float FloatPosZ = Float->GetComponentLocation().Z + DeltaHeight + (Balance*FloatWeight);
+						Float->SetWorldLocation(FVector(Float->GetComponentLocation().X, Float->GetComponentLocation().Y, FloatPosZ));
+
+						if (struggletimer <= 0) {
+							bStruggle = !bStruggle;
+							strugglecounter++;
+							FString toprint = TEXT("the fish got weaker");
+							toprint.AppendInt(strugglecounter);
+							UE_LOG(LogTemp, Warning, TEXT("%s"), *toprint);
+							if (FMath::RandRange(0.0f, 1.0f) <= 0.3f) {
+								HookedFish->Strength += HookedFish->Strength / 16;
+							}
+							struggletimer = FMath::RandRange(StruggleTimeMin, StruggleTimeMax);
+						}
+					}
+
+
+					if (strugglecounter > HookedFish->Toughness) {
+						if (lerpin) {
+							if (!bGetHookPos) {
+								OgHookPos = Float->GetComponentLocation();
+								HookedFish->AttachToComponent(Float, FAttachmentTransformRules::KeepWorldTransform);
+								bGetHookPos = true;
+							}
+							ReelSpeed = ReelSpeed - ReelSpeed / 3;
+							progress = progress + ReelSpeed * -1 * DeltaTime*40.0f;
+							Float->SetWorldLocation(FMath::Lerp(OgHookPos, FVector(MyPlayer->RodTip->GetComponentLocation().X, MyPlayer->RodTip->GetComponentLocation().Y,
+								Float->GetComponentLocation().Z), progress));
+							//UE_LOG(LogTemp, Warning, TEXT("On the Hook"));
+							HookedFish->bDestroyable = false;
+							if (progress >= 0.8f) {
+								if (!bCaught) {
+									FishCatch();
+								}
 							}
 						}
-					}
 
-				}
-				if (Balance < -ScaleMax || Balance>ScaleMax) {
-					FishFree();
+					}
+					if (Balance < -ScaleMax || Balance>ScaleMax) {
+						FishFree();
+					}
 				}
 			}
 		}
 
 	}
 	if (!GetBInteract()) {
-		
+
 		if (!bOnInteractEnd) {
 			MyPlayer->FishingRodOff();
 			myMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			FishtankPlane->SetVisibility(false);
 			Float->SetVisibility(false);
+			FloatLower->SetVisibility(false);
+			FloatUpper->SetVisibility(false);
 			if (HookedFish) {
 				HookedFish->bMove = true;
 				HookedFish->Destroy();
@@ -193,7 +212,7 @@ void AFishingSpot::Tick(float DeltaTime)
 			bFloatpull = true;
 			countstop = false;
 			bOnInteractStart = false;
-			
+
 			/*PhysicsFloatToFish->ConstraintActor2 = NULL;
 			PhysicsFloatToFish->ComponentName2.ComponentName = FName("");*/
 			bCaught = false;
@@ -212,13 +231,14 @@ void AFishingSpot::Tick(float DeltaTime)
 void AFishingSpot::ToggleCastHook()
 {
 	if (!bHooked) {
+		bobcount = 0;
 		bHookCast = !bHookCast;
 		if (bHookCast)
 			FishtankPlane->SetVisibility(false);
 		if (!bHookCast) {
 			FishtankPlane->SetVisibility(true);
 			bFloatpull = true;
-			Float->SetWorldLocation(FVector(Float->GetComponentLocation().X,Float->GetComponentLocation().Y,FloatStartPosition.Z));
+			Float->SetWorldLocation(FVector(Float->GetComponentLocation().X, Float->GetComponentLocation().Y, FloatStartPosition.Z));
 			bHooked = false;
 			if (HookedFish) {
 				HookedFish->bMove = true;
@@ -251,8 +271,11 @@ void AFishingSpot::FishCatch()
 	lerpin = false;
 	HookedFish->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	HookedFish->RootMesh->SetSimulatePhysics(true);
-	HookedFish->AddActorWorldOffset(FVector(0,0,10));
+	HookedFish->RootMesh->SetCollisionProfileName("PickUp");
+	HookedFish->AddActorWorldOffset(FVector(0, 0, 10));
 	Float->SetVisibility(false);
+	FloatLower->SetVisibility(false);
+	FloatUpper->SetVisibility(false);
 	//FloatToFish->SetHiddenInGame(false);
 	//FloatToFish->SetAttachEndTo(HookedFish, TEXT("Mouthspot"), TEXT(""));
 	//PhysicsFloatToFish->ConstraintActor2 = HookedFish;
@@ -260,14 +283,14 @@ void AFishingSpot::FishCatch()
 
 	//test
 	//MyPlayer->RodTip->ConstraintActor2 = TestSphere;
-	
 
-	
+
+
 	MyPlayer->RodTip->ConstraintActor2 = HookedFish;
 	MyPlayer->RodTip->ComponentName2.ComponentName = FName("Mouthspot");
-	
+	MyPlayer->RodTip->InitComponentConstraint();
 
-	
+
 	bStruggle = true;
 	bFloatpull = true;
 	strugglecounter = 0;

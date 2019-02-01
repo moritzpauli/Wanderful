@@ -52,8 +52,12 @@ public:
 	AActor* CurrentInView;
 	UPROPERTY(EditAnywhere)
 	AActor* FishingTestActor;
+	UPROPERTY(EditAnywhere)
+	class USceneComponent* LineStartPosition;
 	float RayCastLength;
 	bool bCameraInHand;
+	bool bFishInspect;
+	bool bCountedCatchI;
 
 protected:
 	// Called when the game starts or when spawned
@@ -67,6 +71,7 @@ protected:
 	void OnWheelDown();
 	void OnFishingTest();
 	void OnTakeCamera();
+	void FishingComplete();
 	
 
 
@@ -80,7 +85,13 @@ protected:
 	bool bFishingTest;
 	FRotator ControlRotation;
 	FVector CameraHoldingPosition;
-	
+	class APhotoCamera* LevelPhotoCamera;
+	TArray<AActor*> LevelPhotoCameras;
+	bool ConstraintInitialized;
+	FVector LineStartOriginal;
+	int CatchIndex;
+	bool bFishingMode;
+	bool bFishView;
 
 
 public:	
@@ -96,6 +107,8 @@ public:
 	class USceneComponent* HoldingComponent;
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* StickHoldingComponent;
+	UPROPERTY(EditAnywhere)
+	class USceneComponent* FishInspectComponent;
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* FishingRod;
 	UPROPERTY(EditAnywhere)

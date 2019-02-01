@@ -194,7 +194,7 @@ void APhotoCamera::DeleteSave()
 void APhotoCamera::SetupPhotoInputComponent(UInputComponent* PhotoInputComponent)
 {
 
-	PhotoInputComponent->BindAction("Fire", IE_Pressed, this, &APhotoCamera::TakePhoto);
+	//PhotoInputComponent->BindAction("Fire", IE_Pressed, this, &APhotoCamera::TakePhoto);
 	PhotoInputComponent->BindAction("CameraMode", IE_Pressed, this, &APhotoCamera::EnterCameraMode);
 	PhotoInputComponent->BindAction("CameraMode", IE_Released, this, &APhotoCamera::ExitCameraMode);
 	PhotoInputComponent->BindAction("DeleteSave", IE_Pressed, this, &APhotoCamera::DeleteSave);

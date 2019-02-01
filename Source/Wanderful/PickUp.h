@@ -49,7 +49,8 @@ public:
 	bool puzzleitem;
 	UPROPERTY(EditAnywhere)
 	bool puzzlepu;
-
+	UPROPERTY(EditAnywhere)
+	bool stackable;
 	
 
 	UFUNCTION()
@@ -57,6 +58,8 @@ public:
 
 	UFUNCTION()
 	void PickUpObject();
+	void PickUpObjectLight();
+	void ThrowObjectLight();
 
 	FRotator ControlRotation;
 	AFPSwanderfulCharacter* MyPlayer;

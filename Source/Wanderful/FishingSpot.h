@@ -25,6 +25,10 @@ public:
 	class UStaticMeshComponent* RespawnTank;
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* Float;
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* FloatUpper;
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* FloatLower;
 	bool bTankInView;
 	UPROPERTY(EditAnywhere)
 	FVector FloatPosition;
@@ -96,6 +100,7 @@ protected:
 	FVector OgHookPos;
 	float progress;
 	FVector FloatStartPosition;
+	
 
 public:
 	virtual void Tick(float DeltaTime) override;
