@@ -13,6 +13,7 @@ AFish::AFish()
 	PrimaryActorTick.bCanEverTick = true;
 	RootMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RootMesh"));
 	MouthSpot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mouthspot"));
+	ShowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShowMesh"));
 	RootMesh->OnComponentEndOverlap.AddDynamic(this, &AFish::OnOverlapEnd);
 	bIdle = false;
 	bCheckSloth = false;

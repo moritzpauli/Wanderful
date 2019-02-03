@@ -56,7 +56,6 @@ public:
 	class USceneComponent* LineStartPosition;
 	float RayCastLength;
 	bool bCameraInHand;
-	bool bFishInspect;
 	bool bCountedCatchI;
 
 protected:
@@ -90,8 +89,9 @@ protected:
 	bool ConstraintInitialized;
 	FVector LineStartOriginal;
 	int CatchIndex;
-	bool bFishingMode;
-	bool bFishView;
+	bool bFishInspect;
+	float OgCableLength;
+	
 
 
 public:	
@@ -134,9 +134,13 @@ public:
 	float MouseSensY;
 
 	bool bCanMove;
-	UPROPERTY(EditAnywhere)
 	bool bHoldingPickUp;
+	UPROPERTY(EditAnywhere)
 	bool bInspecting;
+	UPROPERTY(EditAnywhere)
+	bool bFishExitInspect;
+	UPROPERTY(EditAnywhere)
+	bool bFishEnterInspect;
 
 	float rotationMax;
 	float rotationMin;
