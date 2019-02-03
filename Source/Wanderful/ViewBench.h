@@ -18,7 +18,9 @@ public:
 	AViewBench();
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* PlayerPos;
+	UPROPERTY(EditAnywhere)
 	float LookMaxY;
+	UPROPERTY(EditAnywhere)
 	float LookMaxX;
 	
 
