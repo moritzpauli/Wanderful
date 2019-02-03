@@ -47,8 +47,8 @@ void AViewBench::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (lerpin) {
-		MyPlayer->SetActorLocation(FMath::Lerp(MyPlayer->GetActorLocation(),PlayerPos->GetComponentLocation(), 2.6f*DeltaTime));
-		MyPlayer->GetController()->SetControlRotation(FMath::Lerp(MyPlayer->GetActorRotation(), PlayerPos->GetComponentRotation(), 3.6f*DeltaTime));
+		MyPlayer->SetActorLocation(FMath::Lerp(MyPlayer->GetActorLocation(),PlayerPos->GetComponentLocation(), 1.3f*DeltaTime));
+		MyPlayer->GetController()->SetControlRotation(FMath::Lerp(MyPlayer->GetActorRotation(), PlayerPos->GetComponentRotation(), 2.1f*DeltaTime));
 		MyPlayer->bFreeView = false;
 		if (FIntVector((FMath::RoundToInt(MyPlayer->GetActorLocation().X)), (FMath::RoundToInt(MyPlayer->GetActorLocation().Y)), (FMath::RoundToInt(MyPlayer->GetActorLocation().Z))) ==
 			FIntVector((FMath::RoundToInt(PlayerPos->GetComponentLocation().X)), (FMath::RoundToInt(PlayerPos->GetComponentLocation().Y)), (FMath::RoundToInt(PlayerPos->GetComponentLocation().Z)))

@@ -63,15 +63,14 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	bFreeView = true;
 	bPhotoCamera = false;
 	bFilmRoll = false;
-	RayCastLength = 500.0f;
+	RayCastLength = 800.0f;
 	FishingRod->SetActive(false);
 	bCanMove = true;
 	CameraHoldingPosition = FVector(40, 15, -35);
 	bFishInspect = false;
 	bCountedCatchI = false;
 	MyCatches.SetNum(100);
-	bFishingMode = false;
-	bFishView = false;
+	bFishExitInspect = false;
 }
 
 // Called when the game starts or when spawned
@@ -100,6 +99,7 @@ void AFPSwanderfulCharacter::BeginPlay()
 	LevelPhotoCamera = Cast<APhotoCamera>(LevelPhotoCameras[0]);
 	LineStartPosition->SetWorldLocation(LineStartComponent->GetComponentLocation());
 	LineStartPosition->SetupAttachment(FishingRod);
+	OgCableLength = FishingWire->CableLength;
 }
 
 
@@ -289,7 +289,7 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 			HoldCamera->SetRenderCustomDepth(true);
 		}
 		else {
-			if (!bPhotoCamera) {
+			if (!bPhotoCamera && !bHoldingPickUp && !bFishInspect) {
 				Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 45.0f, 0.1f));
 			}
 		}
@@ -366,11 +366,12 @@ void AFPSwanderfulCharacter::Interact()
 	if (bFishInspect) {
 		MyCatches[CatchIndex]->RootMesh->SetWorldLocation(FVector(-9999, -9999, -9999));
 		CatchIndex++;
-		bFishInspect = false;
-		bFishingMode = false;
-		bFishView = false;
+		bFishExitInspect = true;
 		OnInspectReleased();
-		
+		bFishExitInspect = false;
+		bFishInspect = false;
+
+
 	}
 	if (bFilmRoll) {
 		Cast<AFilmRoll>(hit.GetActor())->OnPickUp();
@@ -395,26 +396,43 @@ void AFPSwanderfulCharacter::Interact()
 void AFPSwanderfulCharacter::OnInspect()
 {
 	if (!bFishInspect) {
-		if (bHoldingPickUp || bCameraInHand || bFishingMode) {
-			UE_LOG(LogTemp, Warning, TEXT("oninspect"));
+		if (bHoldingPickUp || bCameraInHand) {
+
 			LastRotation = GetControlRotation();
 			ToggleMovement();
 			InspectBlur->bEnabled = true;
 		}
 		else {
 			bInspecting = true;
+			UE_LOG(LogTemp, Warning, TEXT("oninspectelse"));
 		}
 	}
-	
+
+	if (bFishInspect) {
+		if (bFishEnterInspect && !bFishExitInspect) {
+
+			LastRotation = GetControlRotation();
+			ToggleMovement();
+			InspectBlur->bEnabled = true;
+		}
+		else {
+			if (!bFishExitInspect) {
+				bInspecting = true;
+				UE_LOG(LogTemp, Warning, TEXT("oninspectelse"));
+			}
+		}
+	}
+
+
+
 }
 
 
 void AFPSwanderfulCharacter::OnInspectReleased()
 {
-
-	if (bFishInspect && !bFishView || bInspecting) {
-		if (bInspecting && bHoldingPickUp || bInspecting && bCameraInHand || bFishInspect && bInspecting) {
-			UE_LOG(LogTemp,Warning,TEXT("oninspectreleased"));
+	if (!bFishInspect) {
+		if ((bInspecting && bHoldingPickUp) || (bInspecting && bCameraInHand)) {
+			UE_LOG(LogTemp, Warning, TEXT("oninspectreleased"));
 			GetController()->SetControlRotation(LastRotation);
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = rotationMax;
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMin = rotationMin;
@@ -423,11 +441,26 @@ void AFPSwanderfulCharacter::OnInspectReleased()
 		}
 		else {
 			bInspecting = false;
+			UE_LOG(LogTemp, Warning, TEXT("oninspectreleasedelse"));
 		}
 	}
-	else {
-		bInspecting = false;
+	if (bFishInspect) {
+		if ((bInspecting && bFishExitInspect)) {
+			UE_LOG(LogTemp, Warning, TEXT("oninspectreleased"));
+			GetController()->SetControlRotation(LastRotation);
+			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = rotationMax;
+			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMin = rotationMin;
+			InspectBlur->bEnabled = false;
+			ToggleMovement();
+		}
+		else {
+			if (bFishExitInspect) {
+				bInspecting = false;
+				UE_LOG(LogTemp, Warning, TEXT("oninspectreleasedelse"));
+			}
+		}
 	}
+
 
 
 }
@@ -476,9 +509,10 @@ void AFPSwanderfulCharacter::OnWheelDown()
 				Cast<AFishingSpot>(CurrentInView)->ReceiveReelInput(-1);
 				if (Cast<AFishingSpot>(CurrentInView)->bCaught) {
 					LineStartComponent->AddWorldOffset(FVector(0, 0, 2.5f));
+					FishingWire->CableLength -= 2.5f;
 					if (Cast<AFishingSpot>(CurrentInView)->HookedFish->RootMesh->GetComponentLocation().Z >= LineStartPosition->GetComponentLocation().Z - 66) {
 						FishingComplete();
-						
+
 					}
 				}
 			}
@@ -514,7 +548,15 @@ void AFPSwanderfulCharacter::OnFishingTest()
 
 void AFPSwanderfulCharacter::OnTakeCamera()
 {
-	if (!bPhotoCamera && !bInspecting) {
+	AStaticInteractable* MyInteractable;
+	bool InInteract = false;
+	if (CurrentInView) {
+		if (CurrentInView->GetClass()->IsChildOf(AStaticInteractable::StaticClass())) {
+			MyInteractable = Cast<AStaticInteractable>(CurrentInView);
+			InInteract = MyInteractable->bInteracting;
+		}
+	}
+	if (!bPhotoCamera && !bInspecting && !InInteract) {
 		bCameraInHand = !bCameraInHand;
 		if (bCameraInHand) {
 			if (bHoldingPickUp) {
@@ -542,15 +584,12 @@ void AFPSwanderfulCharacter::FishingComplete()
 			Cast<AFishingSpot>(CurrentInView)->HookedFish = NULL;
 			Cast<AFishingSpot>(CurrentInView)->OnInteractEnd();
 			FishingRodOff();
-			bCountedCatchI = false;
-			bFishingMode = true;
-			bFishView = true;
-			OnInspect();
+			FishingWire->CableLength = OgCableLength;
+			bCountedCatchI = true;
 			bFishInspect = true;
-			
-			
-
-
+			bFishEnterInspect = true;
+			OnInspect();
+			bFishEnterInspect = false;
 		}
 	}
 }

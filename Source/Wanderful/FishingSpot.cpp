@@ -97,7 +97,6 @@ void AFishingSpot::Tick(float DeltaTime)
 				bOnInteractStart = true;
 			}
 			MyPlayer->FishingRodOn();
-			MyPlayer->bFishInspect = false;
 			if (bTankInView) {
 				Float->SetWorldLocation(FloatPosition);
 			}
@@ -287,7 +286,7 @@ void AFishingSpot::FishCatch()
 
 
 	MyPlayer->RodTip->ConstraintActor2 = HookedFish;
-	MyPlayer->RodTip->ComponentName2.ComponentName = FName("Mouthspot");
+	MyPlayer->RodTip->ComponentName2.ComponentName = FName("MouthSpot");
 	MyPlayer->RodTip->InitComponentConstraint();
 
 
