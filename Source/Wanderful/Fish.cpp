@@ -4,6 +4,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "FishingSpot.h"
 #include "CableComponent.h"
+#include "Runtime/Engine/Classes/PhysicsEngine/PhysicsConstraintComponent.h"
+
 
 
 // Sets default values
@@ -13,7 +15,8 @@ AFish::AFish()
 	PrimaryActorTick.bCanEverTick = true;
 	RootMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RootMesh"));
 	MouthSpot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mouthspot"));
-	ShowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShowMesh"));
+	MouthHook = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("MouthHook"));
+	HookSpot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HookSpot"));
 	RootMesh->OnComponentEndOverlap.AddDynamic(this, &AFish::OnOverlapEnd);
 	bIdle = false;
 	bCheckSloth = false;
@@ -30,6 +33,10 @@ void AFish::BeginPlay()
 	movetimer = movetime;
 	bSetRotation = false;
 	SetActorHiddenInGame(true);
+	MouthHook->SetWorldLocation(MouthSpot->GetComponentLocation());
+	HookSpot->SetWorldLocation(MouthSpot->GetComponentLocation());
+	HookSpot->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+	HookSpot->AddLocalOffset(FVector(8,0,0));
 }
 
 // Called every frame
