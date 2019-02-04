@@ -5,6 +5,7 @@
 #include "FishingSpot.h"
 #include "CableComponent.h"
 #include "Runtime/Engine/Classes/PhysicsEngine/PhysicsConstraintComponent.h"
+#include "Engine.h"
 
 
 
@@ -37,6 +38,7 @@ void AFish::BeginPlay()
 	HookSpot->SetWorldLocation(MouthSpot->GetComponentLocation());
 	HookSpot->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
 	HookSpot->AddLocalOffset(FVector(8,0,0));
+	HookSpot->SetVisibility(false);
 }
 
 // Called every frame
@@ -101,5 +103,29 @@ void AFish::OnOverlapEnd(UPrimitiveComponent * OverlappedComp, AActor * OtherAct
 			}
 		}
 	}
+}
+
+void AFish::OnFishHooked()
+{
+	FActorSpawnParameters HookSpawnParam;
+	HookSpawnParam.Template = HookPivotTemplate;
+	HookPivot = GetWorld()->SpawnActor<AActor>(HookPivotTemplate->GetClass(), FVector(0, 0, 0), FRotator::ZeroRotator, HookSpawnParam);
+	HookPivot->SetActorTransform(HookSpot->GetComponentTransform());
+	Cast<UStaticMeshComponent>(HookPivot->GetRootComponent())->SetSimulatePhysics(true);
+	MouthHook->ConstraintActor1 = this;
+	MouthHook->ConstraintActor2 = HookPivot;
+
+	//init is problem
+	MouthHook->UpdateConstraintFrames();
+	MouthHook->InitializeComponent();
+	MouthHook->InitComponentConstraint();
+
+}
+
+void AFish::OnFishReeledIn()
+{
+	MouthHook->BreakConstraint();
+	HookPivot->Destroy();
+
 }
 

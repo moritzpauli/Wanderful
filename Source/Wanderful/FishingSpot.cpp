@@ -284,9 +284,9 @@ void AFishingSpot::FishCatch()
 	//MyPlayer->RodTip->ConstraintActor2 = TestSphere;
 
 
-
-	MyPlayer->RodTip->ConstraintActor2 = HookedFish;
-	MyPlayer->RodTip->ComponentName2.ComponentName = FName("MouthSpot");
+	HookedFish->OnFishHooked();
+    MyPlayer->RodTip->ConstraintActor2 = HookedFish->HookPivot;
+	//MyPlayer->RodTip->ConstraintActor2 = HookedFish;
 	MyPlayer->RodTip->InitComponentConstraint();
 
 

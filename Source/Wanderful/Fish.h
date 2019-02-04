@@ -38,10 +38,14 @@ public:
 	int Toughness;
 	UPROPERTY(EditAnywhere)
 	float Strength;
+	UPROPERTY(EditAnywhere)
+	AActor* HookPivotTemplate;
 	bool bIdle;
 	int Fishdex;
 	bool bMove;
 	bool bDestroyable;
+	AActor* HookPivot;
+	
 
 
 protected:
@@ -60,6 +64,8 @@ public:
 
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	
+
+	void OnFishHooked();
+	void OnFishReeledIn();
 	
 };

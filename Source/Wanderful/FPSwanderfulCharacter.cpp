@@ -581,6 +581,7 @@ void AFPSwanderfulCharacter::FishingComplete()
 			MyCatches[CatchIndex] = Cast<AFishingSpot>(CurrentInView)->HookedFish;
 			RodTip->BreakConstraint();
 			MyCatches[CatchIndex]->RootMesh->SetSimulatePhysics(false);
+			Cast<AFishingSpot>(CurrentInView)->HookedFish->OnFishReeledIn();
 			Cast<AFishingSpot>(CurrentInView)->HookedFish = NULL;
 			Cast<AFishingSpot>(CurrentInView)->OnInteractEnd();
 			FishingRodOff();

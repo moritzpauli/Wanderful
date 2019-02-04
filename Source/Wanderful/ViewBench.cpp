@@ -12,6 +12,8 @@ AViewBench::AViewBench() {
 	PlayerPos = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("camerapos"));
 	bSat = false;
 	bGotup = true;
+	LookMaxX = 40.0f;
+	LookMaxY = 30.0f;
 }
 
 void AViewBench::BeginPlay()
