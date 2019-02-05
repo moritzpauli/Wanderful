@@ -267,28 +267,29 @@ void AFishingSpot::FishFree()
 
 void AFishingSpot::FishCatch()
 {
+	SpawnedFish[HookedFish->Fishdex] = nullptr;
+	SpawnFish(HookedFish->Fishdex);
 	lerpin = false;
 	HookedFish->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	HookedFish->RootMesh->SetSimulatePhysics(true);
-	HookedFish->RootMesh->SetCollisionProfileName("PickUp");
+	HookedFish->ShowMesh->SetSimulatePhysics(true);
+	HookedFish->ShowMesh->SetCollisionProfileName("Fish");
+	HookedFish->RootMesh->SetCollisionProfileName("Fish");
 	HookedFish->AddActorWorldOffset(FVector(0, 0, 10));
 	Float->SetVisibility(false);
 	FloatLower->SetVisibility(false);
 	FloatUpper->SetVisibility(false);
-	//FloatToFish->SetHiddenInGame(false);
-	//FloatToFish->SetAttachEndTo(HookedFish, TEXT("Mouthspot"), TEXT(""));
-	//PhysicsFloatToFish->ConstraintActor2 = HookedFish;
-	//PhysicsFloatToFish->ComponentName2.ComponentName = FName("Mouthspot");
+	
 
-	//test
-	//MyPlayer->RodTip->ConstraintActor2 = TestSphere;
-
-
-	HookedFish->OnFishHooked();
-    MyPlayer->RodTip->ConstraintActor2 = HookedFish->HookPivot;
-	//MyPlayer->RodTip->ConstraintActor2 = HookedFish;
+	/*HookedFish->FishConstraint->ConstraintActor1 = HookedFish;
+	HookedFish->FishConstraint->ConstraintActor2 = HookedFish;
+	HookedFish->FishConstraint->ComponentName1.ComponentName = TEXT("RootMesh");
+	HookedFish->FishConstraint->ComponentName2.ComponentName = TEXT("ShowMesh");*/
+	MyPlayer->RodTip->ConstraintActor2 = HookedFish;
+	MyPlayer->RodTip->ComponentName2.ComponentName = TEXT("RootMesh");
+	//HookedFish->FishConstraint->InitComponentConstraint();
 	MyPlayer->RodTip->InitComponentConstraint();
-
+	
 
 	bStruggle = true;
 	bFloatpull = true;

@@ -63,23 +63,23 @@ void AViewBench::Tick(float DeltaTime)
 
 
 	if (!lerpin && !lerpout && bSat) {
-		if (MyPlayer->GetActorRotation().Yaw > PlayerPos->GetComponentRotation().Yaw + LookMaxX) {
-			MyPlayer->GetController()->SetControlRotation(FRotator(MyPlayer->GetController()->GetControlRotation().Pitch, PlayerPos->GetComponentRotation().Yaw + LookMaxX, MyPlayer->GetController()->GetControlRotation().Roll));
+		if (MyPlayer->GetActorRotation().Yaw > PlayerPos->GetComponentRotation().Yaw + LookLimits.X) {
+			MyPlayer->GetController()->SetControlRotation(FRotator(MyPlayer->GetController()->GetControlRotation().Pitch, PlayerPos->GetComponentRotation().Yaw + LookLimits.X, MyPlayer->GetController()->GetControlRotation().Roll));
 			//UE_LOG(LogTemp, Warning, TEXT("X"));
 			
 		}
-		if (MyPlayer->GetActorRotation().Yaw < PlayerPos->GetComponentRotation().Yaw - LookMaxX) {
-			MyPlayer->GetController()->SetControlRotation(FRotator(MyPlayer->GetController()->GetControlRotation().Pitch, PlayerPos->GetComponentRotation().Yaw - LookMaxX, MyPlayer->GetController()->GetControlRotation().Roll));
+		if (MyPlayer->GetActorRotation().Yaw < PlayerPos->GetComponentRotation().Yaw - LookLimits.X) {
+			MyPlayer->GetController()->SetControlRotation(FRotator(MyPlayer->GetController()->GetControlRotation().Pitch, PlayerPos->GetComponentRotation().Yaw - LookLimits.X, MyPlayer->GetController()->GetControlRotation().Roll));
 			//UE_LOG(LogTemp, Warning, TEXT("Y"));
 		}
-		if (MyPlayer->GetController()->GetControlRotation().Pitch > PlayerPos->GetComponentRotation().Pitch + LookMaxY && MyPlayer->GetController()->GetControlRotation().Pitch < 180.0f) {
-			MyPlayer->GetController()->SetControlRotation(FRotator( PlayerPos->GetComponentRotation().Pitch + LookMaxY ,MyPlayer->GetController()->GetControlRotation().Yaw, MyPlayer->GetController()->GetControlRotation().Roll));
+		if (MyPlayer->GetController()->GetControlRotation().Pitch > PlayerPos->GetComponentRotation().Pitch + LookLimits.Y && MyPlayer->GetController()->GetControlRotation().Pitch < 180.0f) {
+			MyPlayer->GetController()->SetControlRotation(FRotator( PlayerPos->GetComponentRotation().Pitch + LookLimits.Y ,MyPlayer->GetController()->GetControlRotation().Yaw, MyPlayer->GetController()->GetControlRotation().Roll));
 			//FString lookangle = FString::SanitizeFloat(MyPlayer->GetController()->GetControlRotation().Pitch);
 			//UE_LOG(LogTemp, Warning, TEXT("X"));
 
 		}
-		if (MyPlayer->GetController()->GetControlRotation().Pitch < PlayerPos->GetComponentRotation().Pitch - LookMaxY+ 360.0f && MyPlayer->GetController()->GetControlRotation().Pitch>180.0f) {
-			MyPlayer->GetController()->SetControlRotation(FRotator(PlayerPos->GetComponentRotation().Pitch - LookMaxY, MyPlayer->GetController()->GetControlRotation().Yaw, MyPlayer->GetController()->GetControlRotation().Roll));
+		if (MyPlayer->GetController()->GetControlRotation().Pitch < PlayerPos->GetComponentRotation().Pitch - LookLimits.Y+ 360.0f && MyPlayer->GetController()->GetControlRotation().Pitch>180.0f) {
+			MyPlayer->GetController()->SetControlRotation(FRotator(PlayerPos->GetComponentRotation().Pitch - LookLimits.Y, MyPlayer->GetController()->GetControlRotation().Yaw, MyPlayer->GetController()->GetControlRotation().Roll));
 			//UE_LOG(LogTemp, Warning, TEXT("X"));
 
 		}

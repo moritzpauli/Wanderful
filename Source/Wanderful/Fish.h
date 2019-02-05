@@ -15,13 +15,15 @@ public:
 	// Sets default values for this actor's properties
 	AFish();
 	UPROPERTY(EditAnywhere)
+	class USceneComponent* DefaultRoot;
+	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* RootMesh;
 	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* MouthSpot;
+	class UStaticMeshComponent* ShowMesh;
+	//UPROPERTY(EditAnywhere)
+	//class UPhysicsConstraintComponent* FishConstraint;
 	UPROPERTY(EditAnywhere)
-	class UPhysicsConstraintComponent* MouthHook;
-	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* HookSpot;
+	class USceneComponent* MouthSpot;
 	UPROPERTY(EditAnywhere)
 	FString Rarity;
 	UPROPERTY(EditAnywhere)
@@ -65,7 +67,4 @@ public:
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	void OnFishHooked();
-	void OnFishReeledIn();
-	
 };

@@ -22,6 +22,8 @@ public:
 	float LookMaxY;
 	UPROPERTY(EditAnywhere)
 	float LookMaxX;
+	UPROPERTY(EditAnywhere)
+	FVector2D LookLimits;
 	
 
 private:

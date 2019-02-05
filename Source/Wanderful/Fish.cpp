@@ -14,16 +14,23 @@ AFish::AFish()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	DefaultRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultRoot"));
 	RootMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RootMesh"));
-	MouthSpot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mouthspot"));
-	MouthHook = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("MouthHook"));
-	HookSpot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HookSpot"));
+	//FishConstraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("FishConstraint"));
+	ShowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShowMesh"));
+	MouthSpot = CreateDefaultSubobject<USceneComponent>(TEXT("MouthSpot"));
+	SetRootComponent(DefaultRoot);
+	RootMesh->SetupAttachment(DefaultRoot);
+	//FishConstraint->SetupAttachment(RootMesh);
+	ShowMesh->SetupAttachment(RootMesh);
 	RootMesh->OnComponentEndOverlap.AddDynamic(this, &AFish::OnOverlapEnd);
 	bIdle = false;
 	bCheckSloth = false;
-	RootMesh->SetCollisionProfileName("QueryOnly");
+	RootMesh->SetCollisionProfileName("IgnoreAll");
+	ShowMesh->SetCollisionProfileName("QueryOnly");
 	bMove = true;
 	bDestroyable = true;
+	//RootMesh->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
@@ -34,11 +41,7 @@ void AFish::BeginPlay()
 	movetimer = movetime;
 	bSetRotation = false;
 	SetActorHiddenInGame(true);
-	MouthHook->SetWorldLocation(MouthSpot->GetComponentLocation());
-	HookSpot->SetWorldLocation(MouthSpot->GetComponentLocation());
-	HookSpot->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
-	HookSpot->AddLocalOffset(FVector(8,0,0));
-	HookSpot->SetVisibility(false);
+	
 }
 
 // Called every frame
@@ -105,27 +108,5 @@ void AFish::OnOverlapEnd(UPrimitiveComponent * OverlappedComp, AActor * OtherAct
 	}
 }
 
-void AFish::OnFishHooked()
-{
-	FActorSpawnParameters HookSpawnParam;
-	HookSpawnParam.Template = HookPivotTemplate;
-	HookPivot = GetWorld()->SpawnActor<AActor>(HookPivotTemplate->GetClass(), FVector(0, 0, 0), FRotator::ZeroRotator, HookSpawnParam);
-	HookPivot->SetActorTransform(HookSpot->GetComponentTransform());
-	Cast<UStaticMeshComponent>(HookPivot->GetRootComponent())->SetSimulatePhysics(true);
-	MouthHook->ConstraintActor1 = this;
-	MouthHook->ConstraintActor2 = HookPivot;
 
-	//init is problem
-	MouthHook->UpdateConstraintFrames();
-	MouthHook->InitializeComponent();
-	MouthHook->InitComponentConstraint();
-
-}
-
-void AFish::OnFishReeledIn()
-{
-	MouthHook->BreakConstraint();
-	HookPivot->Destroy();
-
-}
 

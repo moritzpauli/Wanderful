@@ -159,7 +159,7 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 		if (CurrentInView) {
 			if (CurrentInView->GetClass()->IsChildOf(AFishingSpot::StaticClass())) {
 				if (Cast<AFishingSpot>(CurrentInView)->bInteracting &&Cast<AFishingSpot>(CurrentInView)->bCaught) {
-					FishingWire->SetAttachEndTo(Cast<AFishingSpot>(CurrentInView)->HookedFish, TEXT("Mouthspot"), TEXT(""));
+					FishingWire->SetAttachEndTo(Cast<AFishingSpot>(CurrentInView)->HookedFish, TEXT("MouthSpot"), TEXT(""));
 				}
 
 
@@ -260,12 +260,12 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 	if (bInspecting) {
 		if (bFishInspect) {
 			Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 90.0f, 6.0f*DeltaTime));
-			MyCatches[CatchIndex]->RootMesh->SetWorldLocation(FishInspectComponent->GetComponentLocation());
+			MyCatches[CatchIndex]->ShowMesh->SetWorldLocation(FishInspectComponent->GetComponentLocation());
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = 179.9000000000002f;
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = -179.9000000000002f;
 			ControlRotation = GetWorld()->GetFirstPlayerController()->GetControlRotation();
-			MyCatches[CatchIndex]->RootMesh->SetWorldRotation(FQuat(ControlRotation));
-			MyCatches[CatchIndex]->RootMesh->SetRenderCustomDepth(true);
+			MyCatches[CatchIndex]->ShowMesh->SetWorldRotation(FQuat(ControlRotation));
+			MyCatches[CatchIndex]->ShowMesh->SetRenderCustomDepth(true);
 		}
 		if (bHoldingPickUp) {
 			Camera->SetFieldOfView(FMath::Lerp(Camera->FieldOfView, 90.0f, 6.0f*DeltaTime));
@@ -364,7 +364,10 @@ bool AFPSwanderfulCharacter::CastRay(FHitResult  &HitResult)
 void AFPSwanderfulCharacter::Interact()
 {
 	if (bFishInspect) {
+		MyCatches[CatchIndex]->DefaultRoot->SetWorldLocation(FVector(-9999, -9999, -9999));
+		MyCatches[CatchIndex]->ShowMesh->SetWorldLocation(FVector(-9999, -9999, -9999));
 		MyCatches[CatchIndex]->RootMesh->SetWorldLocation(FVector(-9999, -9999, -9999));
+		
 		CatchIndex++;
 		bFishExitInspect = true;
 		OnInspectReleased();
@@ -581,7 +584,7 @@ void AFPSwanderfulCharacter::FishingComplete()
 			MyCatches[CatchIndex] = Cast<AFishingSpot>(CurrentInView)->HookedFish;
 			RodTip->BreakConstraint();
 			MyCatches[CatchIndex]->RootMesh->SetSimulatePhysics(false);
-			Cast<AFishingSpot>(CurrentInView)->HookedFish->OnFishReeledIn();
+			MyCatches[CatchIndex]->ShowMesh->SetSimulatePhysics(false);
 			Cast<AFishingSpot>(CurrentInView)->HookedFish = NULL;
 			Cast<AFishingSpot>(CurrentInView)->OnInteractEnd();
 			FishingRodOff();
