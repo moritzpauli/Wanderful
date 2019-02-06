@@ -268,7 +268,6 @@ void AFishingSpot::FishFree()
 void AFishingSpot::FishCatch()
 {
 	SpawnedFish[HookedFish->Fishdex] = nullptr;
-	SpawnFish(HookedFish->Fishdex);
 	lerpin = false;
 	HookedFish->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	HookedFish->RootMesh->SetSimulatePhysics(true);
@@ -281,13 +280,13 @@ void AFishingSpot::FishCatch()
 	FloatUpper->SetVisibility(false);
 	
 
-	/*HookedFish->FishConstraint->ConstraintActor1 = HookedFish;
+	HookedFish->FishConstraint->ConstraintActor1 = HookedFish;
 	HookedFish->FishConstraint->ConstraintActor2 = HookedFish;
 	HookedFish->FishConstraint->ComponentName1.ComponentName = TEXT("RootMesh");
-	HookedFish->FishConstraint->ComponentName2.ComponentName = TEXT("ShowMesh");*/
+	HookedFish->FishConstraint->ComponentName2.ComponentName = TEXT("ShowMesh");
 	MyPlayer->RodTip->ConstraintActor2 = HookedFish;
 	MyPlayer->RodTip->ComponentName2.ComponentName = TEXT("RootMesh");
-	//HookedFish->FishConstraint->InitComponentConstraint();
+	HookedFish->FishConstraint->InitComponentConstraint();
 	MyPlayer->RodTip->InitComponentConstraint();
 	
 
@@ -313,20 +312,24 @@ void AFishingSpot::SpawnFish(int Index)
 {
 	int variant = FMath::RandRange(0, FishVariants.Num() - 1);
 	if (FishVariants[variant] != NULL) {
+		UE_LOG(LogTemp, Warning, TEXT("Spawned a fish"));
 		FActorSpawnParameters FishSpawnParam;
 		Fishtank->GetLocalBounds(TankBoundsMin, TankBoundsMax);
 		FishSpawnParam.Template = FishVariants[variant];
+		SpawnedFish[Index] = NULL;
 		SpawnedFish[Index] = GetWorld()->SpawnActor<AFish>(FishVariants[variant]->GetClass(), FVector(0, 0, 0), FRotator::ZeroRotator, FishSpawnParam);
 		SpawnedFish[Index]->Fishdex = Index;
-		SpawnedFish[Index]->GetRootComponent()->AttachTo(Fishtank);
+		SpawnedFish[Index]->AttachToComponent(Fishtank,FAttachmentTransformRules::KeepRelativeTransform);
 		SpawnedFish[Index]->SetActorRelativeLocation(FVector(0, 0, 0));
 		//SpawnedFish[i]->SetActorRelativeRotation(FRotator::ZeroRotator);
 		SpawnedFish[Index]->SetActorScale3D(FishVariants[variant]->GetActorScale());
-		FishBounds = SpawnedFish[Index]->GetRootComponent()->CalcBounds(FishTransform).BoxExtent*SpawnedFish[Index]->GetRootComponent()->RelativeScale3D;
+		//FishBounds = SpawnedFish[Index]->ShowMesh->CalcBounds(FishTransform).BoxExtent*SpawnedFish[Index]->ShowMesh->RelativeScale3D;
 		TankBounds = Fishtank->CalcBounds(TankTransform).BoxExtent;
-		float OffsetY = FMath::RandRange(-(Fishtank->CalcBounds(PlaneTransform).BoxExtent.Y) + FishBounds.Y + 0.5f, (Fishtank->CalcBounds(PlaneTransform).BoxExtent.Y) - FishBounds.Y - 0.5f);
-		float OffsetX = FMath::RandRange(-(Fishtank->CalcBounds(PlaneTransform).BoxExtent.X) + FishBounds.X + 0.5f, (Fishtank->CalcBounds(PlaneTransform).BoxExtent.X) - FishBounds.X - 0.5f);
-		SpawnedFish[Index]->AddActorLocalOffset(FVector(OffsetX, OffsetY, 0));
+		//float OffsetY = FMath::RandRange(-(Fishtank->CalcBounds(PlaneTransform).BoxExtent.Y) + 1.5f, (Fishtank->CalcBounds(PlaneTransform).BoxExtent.Y) -  1.5f);
+		//float OffsetX = FMath::RandRange(-(Fishtank->CalcBounds(PlaneTransform).BoxExtent.X)  + 1.5f, (Fishtank->CalcBounds(PlaneTransform).BoxExtent.X) -  1.5f);
+		float OffsetY = FMath::RandRange(-TankBounds.Y , TankBounds.Y);
+		float OffsetX = FMath::RandRange(-TankBounds.X , TankBounds.X);
+		SpawnedFish[Index]->SetActorRelativeLocation(FVector((0+OffsetX),(0+OffsetY),0));
 		SpawnedFish[Index]->SetActorHiddenInGame(false);
 	}
 }

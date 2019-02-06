@@ -16,13 +16,14 @@ AFish::AFish()
 	PrimaryActorTick.bCanEverTick = true;
 	DefaultRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultRoot"));
 	RootMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RootMesh"));
-	//FishConstraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("FishConstraint"));
+	FishConstraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("FishConstraint"));
 	ShowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShowMesh"));
-	MouthSpot = CreateDefaultSubobject<USceneComponent>(TEXT("MouthSpot"));
+	MouthSpot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MouthSpot"));
 	SetRootComponent(DefaultRoot);
 	RootMesh->SetupAttachment(DefaultRoot);
-	//FishConstraint->SetupAttachment(RootMesh);
+	FishConstraint->SetupAttachment(RootMesh);
 	ShowMesh->SetupAttachment(RootMesh);
+	MouthSpot->SetupAttachment(ShowMesh);
 	RootMesh->OnComponentEndOverlap.AddDynamic(this, &AFish::OnOverlapEnd);
 	bIdle = false;
 	bCheckSloth = false;
@@ -30,7 +31,7 @@ AFish::AFish()
 	ShowMesh->SetCollisionProfileName("QueryOnly");
 	bMove = true;
 	bDestroyable = true;
-	//RootMesh->SetVisibility(false);
+	RootMesh->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
@@ -41,6 +42,8 @@ void AFish::BeginPlay()
 	movetimer = movetime;
 	bSetRotation = false;
 	SetActorHiddenInGame(true);
+	RootMesh->SetVisibility(false);
+	MouthSpot->SetVisibility(false);
 	
 }
 
@@ -56,7 +59,7 @@ void AFish::Tick(float DeltaTime)
 	if (movetimer >= 0.0f && bMove) {
 		idletimer = idletime;
 		movetimer -= DeltaTime;
-		RootMesh->AddWorldOffset(RootMesh->GetForwardVector()*speed*DeltaTime);
+		AddActorWorldOffset(RootMesh->GetForwardVector()*speed*DeltaTime);
 		bCheckSloth = false;
 	}
 

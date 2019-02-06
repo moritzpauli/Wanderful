@@ -43,7 +43,6 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	FishingWire->SetupAttachment(FishingRod);
 	LineStartComponent->SetupAttachment(FishingRod);
 	RodTip->SetupAttachment(FishingRod);
-	FishingWire->SetupAttachment(FishingRod);
 	HoldingComponent->SetRelativeLocation(HoldingPosition);
 	HoldingComponent->SetupAttachment(Camera);
 	HoldCamera->SetupAttachment(Camera);
@@ -373,7 +372,7 @@ void AFPSwanderfulCharacter::Interact()
 		OnInspectReleased();
 		bFishExitInspect = false;
 		bFishInspect = false;
-
+		Cast<AFishingSpot>(CurrentInView)->bInRange = true;
 
 	}
 	if (bFilmRoll) {
@@ -513,7 +512,7 @@ void AFPSwanderfulCharacter::OnWheelDown()
 				if (Cast<AFishingSpot>(CurrentInView)->bCaught) {
 					LineStartComponent->AddWorldOffset(FVector(0, 0, 2.5f));
 					FishingWire->CableLength -= 2.5f;
-					if (Cast<AFishingSpot>(CurrentInView)->HookedFish->RootMesh->GetComponentLocation().Z >= LineStartPosition->GetComponentLocation().Z - 66) {
+					if (Cast<AFishingSpot>(CurrentInView)->HookedFish->RootMesh->GetComponentLocation().Z >= LineStartPosition->GetComponentLocation().Z - 30) {
 						FishingComplete();
 
 					}
@@ -580,6 +579,7 @@ void AFPSwanderfulCharacter::FishingComplete()
 {
 	if (CurrentInView && CurrentInView->GetClass()->IsChildOf(AFishingSpot::StaticClass()) && !bFishInspect) {
 		if (Cast<AFishingSpot>(CurrentInView)->HookedFish) {
+			Cast<AFishingSpot>(CurrentInView)->SpawnFish(Cast<AFishingSpot>(CurrentInView)->HookedFish->Fishdex);
 			UE_LOG(LogTemp, Warning, TEXT("Ladies and gentlemen we got em"));
 			MyCatches[CatchIndex] = Cast<AFishingSpot>(CurrentInView)->HookedFish;
 			RodTip->BreakConstraint();

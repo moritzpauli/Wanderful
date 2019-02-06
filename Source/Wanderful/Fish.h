@@ -20,10 +20,8 @@ public:
 	class UStaticMeshComponent* RootMesh;
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* ShowMesh;
-	//UPROPERTY(EditAnywhere)
-	//class UPhysicsConstraintComponent* FishConstraint;
 	UPROPERTY(EditAnywhere)
-	class USceneComponent* MouthSpot;
+	class UPhysicsConstraintComponent* FishConstraint;
 	UPROPERTY(EditAnywhere)
 	FString Rarity;
 	UPROPERTY(EditAnywhere)
@@ -42,6 +40,8 @@ public:
 	float Strength;
 	UPROPERTY(EditAnywhere)
 	AActor* HookPivotTemplate;
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* MouthSpot;
 	bool bIdle;
 	int Fishdex;
 	bool bMove;
@@ -55,6 +55,7 @@ protected:
 	float idletimer;
 	bool bCheckSloth;
 	bool bSetRotation;
+	
 
 protected:
 	// Called when the game starts or when spawned

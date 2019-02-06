@@ -60,7 +60,7 @@ void APumpTest::PumpAction()
 	GetWorld()->GetFirstPlayerController()->GetMousePosition(cMouseX,cMouseY);
 	PumpHandleComp->SetRelativeRotation(FRotator(0,0,cMouseY/(ViewportSize.Y/(rotMin-rotMax))));
 	SteelRod->SetRelativeLocation(FVector(0, 0, cMouseY /(ViewportSize.Y/(RodZmin-RodZmax))));
-	//UE_LOG(LogTemp, Warning, TEXT("%f"), PumpHandleComp->RelativeRotation.Roll);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), cMouseY);
 	UE_LOG(LogTemp, Warning, TEXT("%f"), cMouseY);
 	if (PumpHandleComp->RelativeRotation.Roll >= rotMin) {
 		bHitEnd = true;
