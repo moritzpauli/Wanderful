@@ -8,6 +8,11 @@ AWindmillRotor::AWindmillRotor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	if (WITH_EDITOR)
+	{
+		PrimaryActorTick.bCanEverTick = true;
+		PrimaryActorTick.bStartWithTickEnabled = true;
+	}
 	RootComp = CreateDefaultSubobject<UStaticMeshComponent>("RootComp");
 }
 
@@ -26,5 +31,10 @@ void AWindmillRotor::Tick(float DeltaTime)
 		AddActorLocalRotation(FRotator(0,0,RotSpeed*DeltaTime));
 	}
 
+}
+
+bool AWindmillRotor::ShouldTickIfViewportsOnly() const
+{
+	return true;
 }
 
