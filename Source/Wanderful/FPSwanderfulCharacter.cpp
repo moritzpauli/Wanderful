@@ -13,6 +13,7 @@
 #include "Runtime/Engine/Classes/PhysicsEngine/PhysicsConstraintComponent.h"
 #include "Fish.h"
 #include "PhotoCamera.h"
+#include "FloodGate.h"
 
 
 
@@ -476,7 +477,9 @@ void AFPSwanderfulCharacter::OnFiring()
 	if (CurrentInView) {
 		if (CurrentInView->GetClass()->IsChildOf(AFishingSpot::StaticClass())) {
 			if (Cast<AFishingSpot>(CurrentInView)->bInteracting) {
-				Cast<AFishingSpot>(CurrentInView)->ToggleCastHook();
+				if (!Cast<AFishingSpot>(CurrentInView)->bCaught) {
+					Cast<AFishingSpot>(CurrentInView)->ToggleCastHook();
+				}
 			}
 		}
 	}
@@ -500,6 +503,11 @@ void AFPSwanderfulCharacter::OnWheelUp()
 				Cast<AFishingSpot>(CurrentInView)->ReceiveReelInput(1);
 			}
 		}
+		if (CurrentInView->GetClass()->IsChildOf(AFloodGate::StaticClass())) {
+			if (Cast<AFloodGate>(CurrentInView)->bInteracting) {
+				Cast<AFloodGate>(CurrentInView)->TurnCrank(-1);
+			}
+		}
 	}
 }
 
@@ -517,6 +525,11 @@ void AFPSwanderfulCharacter::OnWheelDown()
 
 					}
 				}
+			}
+		}
+		if (CurrentInView->GetClass()->IsChildOf(AFloodGate::StaticClass())) {
+			if (Cast<AFloodGate>(CurrentInView)->bInteracting) {
+				Cast<AFloodGate>(CurrentInView)->TurnCrank(1);
 			}
 		}
 	}
