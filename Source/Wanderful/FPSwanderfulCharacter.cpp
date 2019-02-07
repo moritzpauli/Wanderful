@@ -639,7 +639,7 @@ void AFPSwanderfulCharacter::ToggleItemPU()
 						if ((Cast<APickUp>(stackhit.GetActor()))->stackable) {
 							CurrentItem->mesh->SetWorldLocation(stackhit.Location);
 							CurrentItem->mesh->SetWorldRotation(stackhit.GetActor()->GetActorRotation());
-							CurrentItem->mesh->AddWorldOffset(FVector(0, 0, 55));
+							CurrentItem->mesh->AddWorldOffset(FVector(0, 0, 40));
 						}
 						else
 						{
