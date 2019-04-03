@@ -399,7 +399,7 @@ void AFPSwanderfulCharacter::Interact()
 void AFPSwanderfulCharacter::OnInspect()
 {
 	if (!bFishInspect) {
-		if (bHoldingPickUp || bCameraInHand) {
+		if (bHoldingPickUp || bCameraInHand && !bPhotoCamera) {
 
 			LastRotation = GetControlRotation();
 			ToggleMovement();
@@ -434,7 +434,7 @@ void AFPSwanderfulCharacter::OnInspect()
 void AFPSwanderfulCharacter::OnInspectReleased()
 {
 	if (!bFishInspect) {
-		if ((bInspecting && bHoldingPickUp) || (bInspecting && bCameraInHand)) {
+		if ((bInspecting && bHoldingPickUp && !bPhotoCamera) || (bInspecting && bCameraInHand && !bPhotoCamera)) {
 			UE_LOG(LogTemp, Warning, TEXT("oninspectreleased"));
 			GetController()->SetControlRotation(LastRotation);
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax = rotationMax;

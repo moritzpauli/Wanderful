@@ -8,6 +8,7 @@ AFloodGate::AFloodGate() {
 	Crank = CreateDefaultSubobject<UStaticMeshComponent>("Crank");
 	bRisen = false;
 	bNewLevel = false;
+	bDeletedCollider = false;
 }
 
 
@@ -29,6 +30,11 @@ void AFloodGate::Tick(float DeltaTime)
 		WaterSurface2->AddActorWorldOffset(FVector(0, 0, -WaterSpeed * DeltaTime));
 		if (WaterSurface1->GetActorLocation().Z <= Surface1Z) {
 			bNewLevel = true;
+			//UE_LOG(LogTemp, Warning, TEXT("Water lowered"));
+			if (!bDeletedCollider) {
+				LakeCollision->Destroy();
+				bDeletedCollider = true;
+			}
 		}
 	}
 

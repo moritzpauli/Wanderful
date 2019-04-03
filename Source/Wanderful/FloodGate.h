@@ -25,6 +25,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	AActor* WaterSurface2;
 	UPROPERTY(EditAnywhere)
+	AActor* LakeCollision;
+	UPROPERTY(EditAnywhere)
 	float Surface1Z;
 	UPROPERTY(EditAnywhere)
 	float Surface2Z;
@@ -38,6 +40,7 @@ public:
 
 protected:
 	bool bNewLevel;
+	bool bDeletedCollider;
 
 public:
 	virtual void Tick(float DeltaTime) override;
