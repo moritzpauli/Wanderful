@@ -24,17 +24,24 @@ public:
 	float LookMaxX;
 	UPROPERTY(EditAnywhere)
 	FVector2D LookLimits;
-	
+	UPROPERTY(EditAnywhere)
+	bool lerpin;
+	UPROPERTY(EditAnywhere)
+	FRotator OgPlayerRot;
+
+
+
 
 private:
 	class UCameraComponent* PlayerCamera;
 	FTransform CameraOGTransform;
 	bool bSat;
 	bool bGotup;
-	bool lerpin;
 	bool lerpout;
 	FVector PlayerOGPosition;
 	FRotator PlayerOGRotation;
+	FRotator TempMinRot;
+	FRotator TempMaxRot;
 	
 
 private:
