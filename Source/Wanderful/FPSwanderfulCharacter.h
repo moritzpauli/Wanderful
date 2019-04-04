@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayTagAssetInterface.h"
 #include "StaticInteractable.h"
+#include "Components/AudioComponent.h"
 #include "FPSwanderfulCharacter.generated.h"
 
 
@@ -54,9 +55,21 @@ public:
 	AActor* FishingTestActor;
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* LineStartPosition;
+	UPROPERTY(EditAnywhere, Category = Audio, meta = (AllowPrivateAcess = "true"))
+	class USoundCue* FootstepSoundCue;
+	UPROPERTY(EditAnywhere, Category = Audio, meta = (AllowPrivateAcess = "true"))
+	class USoundCue* FootstepSoundCueForest;
 	float RayCastLength;
 	bool bCameraInHand;
 	bool bCountedCatchI;
+	UPROPERTY(EditAnywhere)
+	float FootstepCadence;
+	bool bMovingF;
+	bool bMovingR;
+	UPROPERTY(EditAnywhere)
+	UPhysicalMaterial* ForestMat;
+	UPROPERTY(EditAnywhere)
+	UPhysicalMaterial* TestMat;
 
 protected:
 	// Called when the game starts or when spawned
@@ -71,7 +84,7 @@ protected:
 	void OnFishingTest();
 	void OnTakeCamera();
 	void FishingComplete();
-	
+	void PlayFootstepSound();
 
 
 protected:
@@ -91,6 +104,10 @@ protected:
 	int CatchIndex;
 	bool bFishInspect;
 	float OgCableLength;
+	UAudioComponent* FootstepAudioComponent;
+	UAudioComponent* FootstepAudioComponentForest;
+	float FootstepTimer;
+	FTransform CharTransform;
 	
 
 

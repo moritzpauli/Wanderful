@@ -38,6 +38,21 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	LineStartPosition = CreateDefaultSubobject<USceneComponent>("LineStartPosition");
 	FishInspectComponent = CreateDefaultSubobject<USceneComponent>("FishInspectComponent");
 
+	//load sound cue
+	static ConstructorHelpers::FObjectFinder<USoundCue> FootstepSoundCueObject(TEXT("SoundCue'/Game/Sound/NEW/PlayerSound/FootstepSoundCue.FootstepSoundCue'"));
+	if (FootstepSoundCueObject.Succeeded()) {
+		FootstepSoundCue = FootstepSoundCueObject.Object;
+		FootstepAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("FootstepAudioComponent"));
+		FootstepAudioComponent->SetupAttachment(RootComponent);
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> FootstepSoundCueObjectForest(TEXT("SoundCue'/Game/Sound/NEW/PlayerSound/FootstepSoundCueForest.FootstepSoundCueForest'"));
+	if (FootstepSoundCueObjectForest.Succeeded()) {
+		FootstepSoundCueForest = FootstepSoundCueObjectForest.Object;
+		FootstepAudioComponentForest = CreateDefaultSubobject<UAudioComponent>(TEXT("FootstepAudioComponentForest"));
+		FootstepAudioComponentForest->SetupAttachment(RootComponent);
+	}
+
 	FishInspectComponent->SetupAttachment(Camera);
 	FishingRod->SetupAttachment(Camera);
 	FishingWire = CreateDefaultSubobject<UCableComponent>("MyFishingWire");
@@ -71,6 +86,7 @@ AFPSwanderfulCharacter::AFPSwanderfulCharacter()
 	bCountedCatchI = false;
 	MyCatches.SetNum(100);
 	bFishExitInspect = false;
+	FootstepTimer = FootstepCadence;
 }
 
 // Called when the game starts or when spawned
@@ -80,6 +96,14 @@ void AFPSwanderfulCharacter::BeginPlay()
 	if (GEngine) {
 		//put up a debug message for 5 sec. the -1 "key" value (first argument) indicates theat we will never have to update/refresh this message
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Using this FPS character!"));
+	}
+
+	if (FootstepAudioComponent && FootstepSoundCue) {
+		FootstepAudioComponent->SetSound(FootstepSoundCue);
+	}
+
+	if (FootstepAudioComponentForest && FootstepSoundCueForest) {
+		FootstepAudioComponentForest->SetSound(FootstepSoundCueForest);
 	}
 
 	rotationMax = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->ViewPitchMax;
@@ -335,6 +359,16 @@ void AFPSwanderfulCharacter::Tick(float DeltaTime)
 		GetWorld()->GetFirstPlayerController()->InputYawScale = 0;
 	}
 
+	if (bMovingF || bMovingR) {
+		FootstepTimer -= DeltaTime;
+		if (FootstepTimer <= 0) {
+			PlayFootstepSound();
+			FootstepTimer = FootstepCadence;
+		}
+	}
+	else {
+		FootstepTimer = FootstepCadence;
+	}
 }
 
 
@@ -367,7 +401,7 @@ void AFPSwanderfulCharacter::Interact()
 		MyCatches[CatchIndex]->DefaultRoot->SetWorldLocation(FVector(-9999, -9999, -9999));
 		MyCatches[CatchIndex]->ShowMesh->SetWorldLocation(FVector(-9999, -9999, -9999));
 		MyCatches[CatchIndex]->RootMesh->SetWorldLocation(FVector(-9999, -9999, -9999));
-		
+
 		CatchIndex++;
 		bFishExitInspect = true;
 		OnInspectReleased();
@@ -611,6 +645,40 @@ void AFPSwanderfulCharacter::FishingComplete()
 	}
 }
 
+void AFPSwanderfulCharacter::PlayFootstepSound()
+{
+	FHitResult HitResult;
+	bool didhit;
+	//sartpoint
+	FVector StartTrace = GetActorLocation();
+	//Direction
+	FVector ForwardVector = FVector(0, 0, -1);
+	//length
+	
+	RayCastLength =( RootComponent->CalcBounds(CharTransform).BoxExtent.Z)+30 ;
+	FVector EndTrace = ((ForwardVector*RayCastLength) + StartTrace);
+	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
+	TraceParams->bReturnPhysicalMaterial = true;
+	DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green, true);
+	didhit = GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams);
+	//FString HitObject = HitResult.GetActor()->GetName();
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *HitObject);
+	TestMat = Cast<UPhysicalMaterial>(HitResult.PhysMaterial);
+	if (didhit) {
+		if (Cast<UPhysicalMaterial>(HitResult.PhysMaterial) == ForestMat) {
+			if (FootstepAudioComponentForest && FootstepSoundCueForest) {
+				FootstepAudioComponentForest->Play(0.0f);
+				UE_LOG(LogTemp, Warning, TEXT("forest sound"));
+			}
+		}
+		else {
+			if (FootstepAudioComponent && FootstepSoundCue) {
+				FootstepAudioComponent->Play(0.0f);
+			}
+		}
+	}
+}
+
 void AFPSwanderfulCharacter::ToggleMovement()
 {
 	bCanMove = !bCanMove;
@@ -728,6 +796,12 @@ void AFPSwanderfulCharacter::MoveForward(float value)
 	if (bCanMove) {
 		FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
 		AddMovementInput(Direction, value);
+		if (FMath::Abs(value) > 0) {
+			bMovingF = true;
+		}
+		else {
+			bMovingF = false;
+		}
 		if (abs(value) > 0 && !bBobStrafe) {
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 0.08f);
 			bBobStraight = true;
@@ -745,6 +819,12 @@ void AFPSwanderfulCharacter::MoveRight(float value)
 		//find out right direction
 		FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
 		AddMovementInput(Direction, value);
+		if (FMath::Abs(value) > 0) {
+			bMovingR = true;
+		}
+		else {
+			bMovingR = false;
+		}
 		if (abs(value) > 0 && !bBobStraight) {
 			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 0.08f);
 			bBobStrafe = true;

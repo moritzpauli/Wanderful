@@ -64,8 +64,8 @@ void AViewBench::Tick(float DeltaTime)
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%f"), MyPlayer->GetActorRotation().GetDenormalized().Yaw);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), OgPlayerRot.Yaw);
+	//UE_LOG(LogTemp, Warning, TEXT("%f"), MyPlayer->GetActorRotation().GetDenormalized().Yaw);
+	//UE_LOG(LogTemp, Warning, TEXT("%f"), OgPlayerRot.Yaw);
 	if (!lerpin && !lerpout && bSat) {
 		TempMaxRot = FRotator(0.0f,OgPlayerRot.Yaw , 0.0f);
 		TempMinRot = FRotator(0.0f, OgPlayerRot.Yaw, 0.0f);
